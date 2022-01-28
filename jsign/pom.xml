@@ -1,0 +1,303 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>net.jsign</groupId>
+  <artifactId>jsign</artifactId>
+  <parent>
+    <groupId>net.jsign</groupId>
+    <artifactId>jsign-parent</artifactId>
+    <version>4.0</version>
+    <relativePath>../pom.xml</relativePath>
+  </parent>
+  <name>Jsign - Authenticode implementation in Java (Distribution)</name>
+  <version>4.0</version>
+  <packaging>jar</packaging>
+
+  <dependencies>
+    <dependency>
+      <groupId>net.jsign</groupId>
+      <artifactId>jsign-core</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    
+    <dependency>
+      <groupId>net.jsign</groupId>
+      <artifactId>jsign-ant</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    
+    <dependency>
+      <groupId>net.jsign</groupId>
+      <artifactId>jsign-cli</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <version>3.3.0</version>
+        <executions>
+          <execution>
+            <id>attach-javadocs</id>
+            <goals>
+              <goal>jar</goal>
+            </goals>
+            <configuration>
+              <includeDependencySources>true</includeDependencySources>
+              <dependencySourceExcludes>
+                <dependencySourceExclude>net.jsign:jsign-cli</dependencySourceExclude>
+                <dependencySourceExclude>net.jsign:jsign-ant</dependencySourceExclude>
+              </dependencySourceExcludes>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.jacoco</groupId>
+        <artifactId>jacoco-maven-plugin</artifactId>
+        <version>0.8.7</version>
+        <executions>
+          <execution>
+            <id>jacoco-report</id>
+            <phase>site</phase>
+            <goals>
+              <goal>report-aggregate</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-shade-plugin</artifactId>
+        <version>3.2.4</version>
+        <executions>
+          <execution>
+            <phase>package</phase>
+            <goals>
+              <goal>shade</goal>
+            </goals>
+            <configuration>
+              <minimizeJar>true</minimizeJar>
+              <filters>
+                <filter>
+                  <artifact>*:*</artifact>
+                  <excludes>
+                    <exclude>META-INF/**</exclude>
+                    <exclude>**/*_de.properties</exclude>
+                    <exclude>**/MavenShadePluginHelper.*</exclude>
+                    <exclude>**/commons/codec/language/**</exclude>
+                    <exclude>**/commons/math3/random/**</exclude>
+                    <exclude>**/poi/ss/formula/**</exclude>
+                    <exclude>**/poi/sl/draw/geom/**</exclude>
+                    <exclude>font_metrics.properties</exclude>
+                    <exclude>assets/org/apache/commons/math3/**</exclude>
+                  </excludes>
+                </filter>
+              </filters>
+              <relocations>
+                <relocation>
+                  <pattern>org.bouncycastle</pattern>
+                  <shadedPattern>net.jsign.bouncycastle</shadedPattern>
+                </relocation>
+                <relocation>
+                  <pattern>org.apache.commons</pattern>
+                  <shadedPattern>net.jsign.commons</shadedPattern>
+                </relocation>
+                <relocation>
+                  <pattern>org.apache.poi</pattern>
+                  <shadedPattern>net.jsign.poi</shadedPattern>
+                </relocation>
+                <relocation>
+                  <pattern>com.cedarsoftware</pattern>
+                  <shadedPattern>net.jsign.json-io</shadedPattern>
+                </relocation>
+              </relocations>
+              <transformers>
+                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                  <mainClass>net.jsign.JsignCLI</mainClass>
+                </transformer>
+              </transformers>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>com.github.wvengen</groupId>
+        <artifactId>proguard-maven-plugin</artifactId>
+        <version>2.4.0</version>
+        <executions>
+          <execution>
+            <id>proguard-minimizing</id>
+            <phase>package</phase>
+            <goals>
+              <goal>proguard</goal>
+            </goals>
+            <configuration>
+              <obfuscate>false</obfuscate>
+              <options>
+                <option>-dontwarn</option>
+                <option>-dontnote **</option>
+                <option>-dontoptimize</option>
+                <option>-keep public class net.jsign.* { *; }</option>
+                <option>-keep public class net.jsign.asn1.authenticode.* { *; }</option>
+                <option>-keep public class net.jsign.asn1.authenticode.* { *; }</option>
+                <option>-keep public class net.jsign.msi.* { *; }</option>
+                <option>-keep public class net.jsign.pe.* { *; }</option>
+                <option>-keep public class net.jsign.script.* { *; }</option>
+                <option>-keep public class net.jsign.timestamp.* { *; }</option>
+                <option>-keeppackagenames net.jsign</option>
+              </options>
+              <injar>${project.build.finalName}.jar</injar>
+              <includeDependency>false</includeDependency>
+              <libs>
+                <lib>${proguard.bootclasspath}</lib>
+              </libs>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>com.github.siom79.japicmp</groupId>
+        <artifactId>japicmp-maven-plugin</artifactId>
+        <version>0.15.3</version>
+        <executions>
+          <execution>
+            <phase>package</phase>
+            <goals>
+              <goal>cmp</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <parameter>
+            <onlyModified>true</onlyModified>
+            <onlyBinaryIncompatible>true</onlyBinaryIncompatible>
+            <includeSynthetic>true</includeSynthetic>
+            <breakBuildOnBinaryIncompatibleModifications>true</breakBuildOnBinaryIncompatibleModifications>
+            <breakBuildOnSourceIncompatibleModifications>true</breakBuildOnSourceIncompatibleModifications>
+            <excludes>
+              <exclude>net.jsign.asn1.*</exclude>
+              <exclude>net.jsign.bouncycastle.*</exclude>
+              <exclude>net.jsign.poi.*</exclude>
+              <exclude>net.jsign.commons.*</exclude>
+              <exclude>net.jsign.PESigner</exclude>
+              <exclude>net.jsign.PESignerCLI</exclude>
+            </excludes>
+            <ignoreMissingClassesByRegularExpressions>
+              <ignoreMissingClassesByRegularExpression>org.apache.tools.ant.*</ignoreMissingClassesByRegularExpression>
+            </ignoreMissingClassesByRegularExpressions>
+            <skipXmlReport>true</skipXmlReport>
+            <skipDiffReport>true</skipDiffReport>
+          </parameter>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-antrun-plugin</artifactId>
+        <version>3.0.0</version>
+        <executions>
+          <execution>
+            <id>replace-version</id>
+            <phase>package</phase>
+            <goals>
+              <goal>run</goal>
+            </goals>
+            <configuration>
+              <target>
+                <mkdir dir="${project.build.directory}/deb"/>
+                <copy todir="${project.build.directory}/deb" filtering="true">
+                  <fileset dir="src/deb"/>
+                  <filterset>
+                    <filter token="VERSION" value="${project.version}"/>
+                  </filterset>
+                </copy>
+              </target>
+            </configuration>
+          </execution>
+          <execution>
+            <id>make-rpm</id>
+            <phase>package</phase>
+            <goals>
+              <goal>run</goal>
+            </goals>
+            <configuration>
+              <target>
+                <taskdef name="redline" classname="org.freecompany.redline.ant.RedlineTask" classpath="maven.plugin.classpath" />
+                
+                <redline destination="${project.build.directory}" group="Development/Tools" name="${project.artifactId}" version="${project.version}" url="${project.url}" preinstallscript="src/deb/control/preinst" postinstallscript="src/deb/control/postinst" preuninstallscript="src/deb/control/prerm">
+                  <tarfileset dir="${project.build.directory}/deb/data" />
+                  <tarfileset dir="${project.build.directory}" prefix="/usr/share/${project.artifactId}">
+                    <include name="${project.build.finalName}.jar" />
+                  </tarfileset>
+                  <depends name="java" version="&gt;= 1.8" />
+                </redline>
+              </target>
+            </configuration>
+          </execution>
+        </executions>
+        <dependencies>
+          <dependency>
+            <groupId>org.redline-rpm</groupId>
+            <artifactId>redline</artifactId>
+            <version>1.1.12</version>
+          </dependency>
+        </dependencies>
+      </plugin>
+      <plugin>
+        <artifactId>jdeb</artifactId>
+        <groupId>org.vafer</groupId>
+        <version>1.8</version>
+        <executions>
+          <execution>
+            <phase>package</phase>
+            <goals>
+              <goal>jdeb</goal>
+            </goals>
+            <configuration>
+              <attach>false</attach>
+              <dataSet>
+                <data>
+                  <type>file</type>
+                  <src>${project.build.directory}/${project.build.finalName}.jar</src>
+                  <mapper>
+                    <type>perm</type>
+                    <prefix>/usr/share/jsign</prefix>
+                  </mapper>
+                </data>
+                <data>
+                  <type>directory</type>
+                  <src>${project.build.directory}/deb/data</src>
+                </data>
+              </dataSet>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+
+  <profiles>
+    <profile>
+      <id>proguard-bootclasspath-pre-java9</id>
+      <activation>
+        <jdk>(,1.8]</jdk>
+      </activation>
+      <properties>
+        <proguard.bootclasspath>${java.home}/lib/rt.jar</proguard.bootclasspath>
+      </properties>
+    </profile>
+
+    <profile>
+      <id>proguard-bootclasspath-post-java9</id>
+      <activation>
+        <jdk>[9,)</jdk>
+      </activation>
+      <properties>
+        <proguard.bootclasspath>${java.home}/jmods/java.base.jmod</proguard.bootclasspath>
+      </properties>
+    </profile>
+  </profiles>
+
+</project>

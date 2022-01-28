@@ -1,0 +1,172 @@
+<project name="Jsign Ant tests">
+
+  <taskdef name="jsign" classname="net.jsign.JsignTask"/>
+  
+  <property name="keystore" value="keystores/keystore.jks"/>
+  <property name="alias"    value="test"/>
+  <property name="keypass"  value="password"/>
+
+  <target name="missing-keystore">
+    <jsign file="wineyes-signed-with-ant.exe"/>
+  </target>
+
+  <target name="unsupported-keystore">
+    <jsign file="wineyes-signed-with-ant.exe" keystore="keystores/keystore.jks" storetype="ABC"/>
+  </target>
+
+  <target name="keystore-not-found">
+    <jsign file="wineyes-signed-with-ant.exe" keystore="keystores/keystore2.jks"/>
+  </target>
+
+  <target name="corrupted-keystore">
+    <jsign file="wineyes-signed-with-ant.exe" keystore="wineyes.exe"/>
+  </target>
+
+  <target name="missing-alias">
+    <jsign file="wineyes-signed-with-ant.exe" keystore="keystores/keystore.jks"/>
+  </target>
+
+  <target name="alias-not-found">
+    <jsign file="wineyes-signed-with-ant.exe" keystore="keystores/keystore.jks" alias="unknown"/>
+  </target>
+
+  <target name="certificate-not-found">
+    <jsign file="wineyes-signed-with-ant.exe" keystore="keystores/keystore.jks" storepass="" alias="foo"/>
+  </target>
+
+  <target name="missing-file">
+    <jsign keystore="keystore.jks" alias="test" keypass="password"/>
+  </target>
+
+  <target name="file-not-found">
+    <jsign file="wineyes-foo.exe" keystore="keystores/keystore.jks" alias="test" keypass="password"/>
+  </target>
+
+  <target name="corrupted-file">
+    <jsign file="keystore.jks" keystore="keystores/keystore.jks" alias="test" keypass="password"/>
+  </target>
+
+  <target name="conflicting-attributes">
+    <jsign file="wineyes-signed-with-ant.exe" keystore="keystores/keystore.jks" alias="test" keyfile="keystores/privatekey.pvk" certfile="keystores/certificates.spc"/>
+  </target>
+
+  <target name="missing-certfile">
+    <jsign file="wineyes-signed-with-ant.exe" keyfile="keystores/privatekey.pvk"/>
+  </target>
+
+  <target name="missing-keyfile">
+    <jsign file="wineyes-signed-with-ant.exe" certfile="keystores/certificates.spc"/>
+  </target>
+
+  <target name="certfile-not-found">
+    <jsign file="wineyes-signed-with-ant.exe" certfile="keystores/certificate2.spc" keyfile="keystores/privatekey.pvk"/>
+  </target>
+
+  <target name="keyfile-not-found">
+    <jsign file="wineyes-signed-with-ant.exe" certfile="keystores/jsign-test-certificate-full-chain.spc" keyfile="keystores/privatekey2.pvk"/>
+  </target>
+
+  <target name="corrupted-certfile">
+    <jsign file="wineyes-signed-with-ant.exe" certfile="keystores/privatekey.pvk" keyfile="keystores/privatekey.pvk"/>
+  </target>
+
+  <target name="corrupted-keyfile">
+    <jsign file="wineyes-signed-with-ant.exe" certfile="keystores/jsign-test-certificate-full-chain.spc" keyfile="keystores/jsign-test-certificate-full-chain.spc"/>
+  </target>
+
+  <target name="unsupported-digest-algorithm">
+    <jsign file="wineyes-signed-with-ant.exe" alg="SHA-123" keystore="keystores/keystore.jks" alias="test" keypass="password"/>
+  </target>
+
+  <target name="signing">
+    <jsign file="wineyes-signed-with-ant.exe"
+             name="WinEyes"
+             url="http://www.steelblue.com/WinEyes"
+             alg="SHA-1"
+             keystore="${keystore}"
+             alias="${alias}"
+             keypass="${keypass}"/>
+  </target>
+
+  <target name="signing-powershell">
+    <jsign file="hello-world-signed-with-ant.ps1"
+           alg="SHA-1"
+           encoding="ISO-8859-1"
+           keystore="${keystore}"
+           alias="${alias}"
+           keypass="${keypass}"/>
+  </target>
+
+  <target name="signing-msi">
+    <jsign file="minimal-signed-with-ant.msi"
+             alg="SHA-1"
+             keystore="${keystore}"
+             alias="${alias}"
+             keypass="${keypass}"/>
+  </target>
+
+  <target name="signing-pkcs12">
+    <jsign file="wineyes-signed-with-ant.exe"
+             name="WinEyes"
+             url="http://www.steelblue.com/WinEyes"
+             alg="SHA-256"
+             keystore="keystores/keystore.p12"
+             alias="test"
+             storepass="password"/>
+  </target>
+
+  <target name="signing-pvk-spc">
+    <jsign file="wineyes-signed-with-ant.exe"
+             certfile="keystores/jsign-test-certificate-full-chain.spc"
+             keyfile="keystores/privatekey-encrypted.pvk"
+             keypass="password"/>
+  </target>
+
+  <target name="timestamping-authenticode">
+    <copy file="wineyes.exe" tofile="wineyes-timestamped-with-ant-authenticode.exe" overwrite="true"/>
+    <jsign file="wineyes-timestamped-with-ant-authenticode.exe"
+             keystore="${keystore}"
+             alias="${alias}"
+             keypass="${keypass}"
+             tsaurl="http://timestamp.comodoca.com/authenticode"
+             tsmode="authenticode"
+             tsretries="5"
+             tsretrywait="15"/>
+  </target>
+
+  <target name="timestamping-rfc3161">
+    <copy file="wineyes.exe" tofile="wineyes-timestamped-with-ant-rfc3161.exe" overwrite="true"/>
+    <jsign file="wineyes-timestamped-with-ant-rfc3161.exe"
+             keystore="${keystore}"
+             alias="${alias}"
+             keypass="${keypass}"
+             tsaurl="http://timestamp.comodoca.com/rfc3161"
+             tsmode="rfc3161"
+             tsretries="5"
+             tsretrywait="15"/>
+  </target>
+
+  <target name="replace-signature">
+    <copy file="wineyes.exe" tofile="wineyes-re-signed.exe" overwrite="true"/>
+    <jsign file="wineyes-re-signed.exe"
+             keystore="${keystore}"
+             alias="${alias}"
+             keypass="${keypass}"/>
+    <jsign file="wineyes-re-signed.exe"
+             keystore="${keystore}"
+             alias="${alias}"
+             keypass="${keypass}"
+             alg="SHA-512"
+             replace="true"/>
+  </target>
+
+  <target name="detach-signature">
+    <copy file="wineyes.exe" tofile="wineyes-signed-detached.exe" overwrite="true"/>
+    <jsign file="wineyes-signed-detached.exe"
+           keystore="${keystore}"
+           alias="${alias}"
+           keypass="${keypass}"
+           detached="true"/>
+  </target>
+
+</project>
