@@ -1,0 +1,160 @@
+/*
+ * LensKit, an open-source toolkit for recommender systems.
+ * Copyright 2014-2017 LensKit contributors (see CONTRIBUTORS.md)
+ * Copyright 2010-2014 Regents of the University of Minnesota
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining
+ * a copy of this software and associated documentation files (the
+ * "Software"), to deal in the Software without restriction, including
+ * without limitation the rights to use, copy, modify, merge, publish,
+ * distribute, sublicense, and/or sell copies of the Software, and to
+ * permit persons to whom the Software is furnished to do so, subject to
+ * the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be
+ * included in all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+ * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+ * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+ * IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+ * CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+ * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+ * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
+/**
+ * Integration tests built with Gradle.
+ */
+def ift = task makeTestRepo(group: 'build setup') {
+    for (prj in rootProject.childProjects.values()) {
+        if (prj.name =~ /^lenskit-(?!integration-tests)/) {
+            dependsOn "$prj.path:installForTesting"
+        }
+    }
+}
+
+def testGradleVersions = ['2.2', '2.3', '2.4', '2.5', '2.6', '2.7',
+                          '2.8', '2.9', '2.10', '2.11', '2.12']
+
+task gradleTests(group: 'verification')
+check.dependsOn gradleTests
+
+file('src/it/gradle').eachDir { testDir ->
+    def fname = testDir.name
+    def tname = fname.replaceAll(/(?:^|-)(.)/) { m -> m[1].toUpperCase() }
+    def workDir = file("build/gradle-tests/$fname")
+
+    task("init$tname", type: Copy) {
+        from 'src/it/gradle'
+        include '*.gradle'
+        include '*.properties'
+        into workDir
+    }
+
+    task("copy$tname", type: Copy) {
+        dependsOn "init$tname"
+        from testDir
+        into workDir
+    }
+
+    task("test$tname", type: GradleBuild, group: 'build test') {
+        description "Run the ${testDir.name} test."
+        dependsOn makeTestRepo, fetchData, processMLData
+        dependsOn "copy$tname"
+        mustRunAfter test
+        mustRunAfter ':lenskit-gradle:check'
+        // inputs.dir rootProject.file('build/lenskit-current-repo')
+        inputs.dir testDir
+        inputs.files fileTree(workDir) {
+            include '*.gradle'
+        }
+        inputs.dir "$buildDir/lenskit-current-repo"
+        outputs.dir workDir
+
+        startParameter.searchUpwards = false
+        startParameter.projectProperties = [
+                testRepoURI: rootProject.uri("build/lenskit-current-repo"),
+                lenskitVersion: project.version,
+                mlDataDir: mlDataDir,
+                ratingsFile: "$mlDataDir/u.data"
+        ]
+        def props = new Properties()
+        if (file("$testDir/gradle.properties").exists()) {
+            file("$testDir/gradle.properties").withReader { r ->
+                props.load(r)
+            }
+            if (props.getProperty("org.gradle.parallel") == 'true') {
+                startParameter.setParallelProjectExecutionEnabled(true)
+            }
+        }
+        dir = workDir
+        buildFile = "$workDir/build.gradle"
+        tasks = ['check']
+
+        if (file("$testDir/verify.py").exists()) {
+            dependsOn "checkPythonInstall"
+            onlyIf {
+                checkPythonInstall.isValid
+            }
+        }
+        onlyIf {
+            !file("$testDir/ignore").exists()
+        }
+        onlyIf {
+            travis.branch != 'coverity_scan'
+        }
+    }
+
+    gradleTests.dependsOn "test$tname"
+}
+
+tasks.testCliClasspath.dependsOn processMLData
+
+task unpackOfflineRepo(type: Copy) {
+    dependsOn rootProject.repoZip
+    from zipTree(rootProject.repoZip.archivePath)
+    into "$buildDir/offline-repo"
+}
+testEvalWithOfflineRepo {
+    dependsOn unpackOfflineRepo
+    startParameter.projectProperties['offlineRepoURI'] = uri("$buildDir/offline-repo/lenskit-repo-$version")
+}
+
+def basicGradleTest = 'src/it/gradle/gradle-plugin-basics'
+def gradleTestWorkDir = "$buildDir/gradle-versions"
+for (ver in testGradleVersions) {
+    def workDir = "$gradleTestWorkDir/$ver"
+    def prep = task("prepBasicGradle$ver", type: Copy) {
+        ext.gradleVersion = ver
+        from basicGradleTest
+        into workDir
+        from('src/it/gradle') {
+            include 'common.gradle'
+        }
+        from(rootDir) {
+            include 'gradlew'
+            include 'gradlew.bat'
+            include 'gradle/wrapper/gradle-wrapper.jar'
+        }
+        doLast {
+            file("$workDir/gradle/wrapper/gradle-wrapper.properties").text = """\
+distributionBase=GRADLE_USER_HOME
+distributionPath=wrapper/dists
+zipStoreBase=GRADLE_USER_HOME
+zipStorePath=wrapper/dists
+distributionUrl=https\\://services.gradle.org/distributions/gradle-$gradleVersion-bin.zip
+""".stripIndent()
+            file("$workDir/gradle.properties").text = """\
+testRepoURI=${rootProject.uri("build/lenskit-current-repo").toString().replaceAll(':', '\\:')}
+lenskitVersion=${project.version}
+"""
+            file("$workDir/settings.gradle").text = ""
+        }
+    }
+    def test = task("testBasicGradle$ver", type: Exec, dependsOn: [prep, makeTestRepo]) {
+        workingDir workDir
+        executable './gradlew'
+        args 'check', '--stacktrace'
+    }
+    crossCheck.dependsOn test
+}

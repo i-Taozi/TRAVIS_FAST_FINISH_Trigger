@@ -1,0 +1,143 @@
+/*
+ * LensKit, an open-source toolkit for recommender systems.
+ * Copyright 2014-2017 LensKit contributors (see CONTRIBUTORS.md)
+ * Copyright 2010-2014 Regents of the University of Minnesota
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining
+ * a copy of this software and associated documentation files (the
+ * "Software"), to deal in the Software without restriction, including
+ * without limitation the rights to use, copy, modify, merge, publish,
+ * distribute, sublicense, and/or sell copies of the Software, and to
+ * permit persons to whom the Software is furnished to do so, subject to
+ * the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be
+ * included in all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+ * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+ * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+ * IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+ * CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+ * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+ * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
+/* Distribution support code for the LensKit project.  This makes the high-level
+ * final distributions.
+ */
+
+import org.lenskit.build.MavenRepublish
+
+import java.util.zip.ZipFile
+
+apply plugin: 'distribution'
+apply plugin: 'maven'
+
+def cliProject = project(':lenskit-cli')
+
+// aggregate license info and notices from dependencies
+task notices(group: 'build') {
+    ext.noticeFile = "$buildDir/NOTICE.txt"
+    inputs.files {
+        cliProject.configurations.runtime
+    }
+    outputs.file noticeFile
+
+    doFirst {
+        mkdir buildDir
+    }
+    doLast {
+        def cfg = cliProject.configurations.runtime.resolvedConfiguration
+        file(noticeFile).withPrintWriter { out ->
+            out.println("This file contains the notices required by the libraries used by LensKit.")
+            out.println()
+
+            cfg.resolvedArtifacts*.file.each { File jar ->
+                def zip = new ZipFile(jar)
+                try {
+                    def noticeEntry = zip.getEntry("META-INF/NOTICE.txt")
+                    if (noticeEntry != null) {
+                        def notice = zip.getInputStream(noticeEntry).text
+                        out.println("${jar.name}:")
+                        notice.eachLine { line ->
+                            out.println("    ${line}")
+                        }
+                        out.println()
+                    }
+                } finally {
+                    zip.close()
+                }
+            }
+        }
+    }
+}
+
+task startScripts(type: CreateStartScripts) {
+    outputDir = file("$buildDir/scripts")
+    mainClassName = 'org.lenskit.cli.Main'
+    applicationName = 'lenskit'
+}
+
+task copyMavenDeps(type: MavenRepublish)
+project(':lenskit-cli').afterEvaluate { prj ->
+    copyMavenDeps.configurations << prj.configurations.runtime
+}
+project(':lenskit-gradle').afterEvaluate { prj ->
+    copyMavenDeps.configurations << prj.configurations.runtime
+}
+
+task repoZip(type: Zip) {
+    dependsOn copyMavenDeps
+    dependsOn ':lenskit-integration-tests:makeTestRepo'
+
+    archiveName "lenskit-repo-${version}.zip"
+    from "$buildDir/lenskit-current-repo"
+    from "$buildDir/offline-repo"
+    into "lenskit-repo-$version"
+}
+
+distributions {
+    main {
+        baseName = 'lenskit'
+        contents {
+            from(startScripts) {
+                into 'bin'
+            }
+            from notices
+
+            from(javadoc) {
+                into 'javadoc'
+            }
+        }
+    }
+}
+
+cliProject.afterEvaluate { clip ->
+    startScripts.classpath = clip.configurations.runtime + clip.jar.outputs.files
+    rootProject.distributions.main.contents {
+        from(startScripts.classpath) {
+            into 'lib'
+        }
+        from(clip.tasks['renderManPages']) {
+            into 'man'
+        }
+    }
+}
+project(':lenskit-gradle').afterEvaluate { gpp ->
+    rootProject.distributions.main.contents {
+        from(gpp.groovydoc) {
+            into 'gradle-doc'
+        }
+    }
+}
+
+distTar {
+    extension 'tgz'
+    compression Compression.GZIP
+}
+
+build.dependsOn installDist
+
+if (hasProperty('lenskit.install.dir')) {
+    installDist.destinationDir = rootProject.file(getProperty('lenskit.install.dir'))
+}

@@ -1,0 +1,103 @@
+/*
+ * LensKit, an open-source toolkit for recommender systems.
+ * Copyright 2014-2017 LensKit contributors (see CONTRIBUTORS.md)
+ * Copyright 2010-2014 Regents of the University of Minnesota
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining
+ * a copy of this software and associated documentation files (the
+ * "Software"), to deal in the Software without restriction, including
+ * without limitation the rights to use, copy, modify, merge, publish,
+ * distribute, sublicense, and/or sell copies of the Software, and to
+ * permit persons to whom the Software is furnished to do so, subject to
+ * the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be
+ * included in all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+ * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+ * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+ * IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+ * CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+ * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+ * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
+// Aggregate documentation
+ext.masterProjects = ['lenskit-api', 'lenskit-core',
+                      'lenskit-groovy', 'lenskit-eval', 'lenskit-cli',
+                      'lenskit-knn', 'lenskit-svd',
+                      'lenskit-slopeone', 'lenskit-predict']
+task javadoc(type: Javadoc, group: 'build') {
+    for (prj in masterProjects) {
+        source project(prj).sourceSets.main.allJava
+        mustRunAfter ":$prj:javadoc"
+    }
+    destinationDir = file("$buildDir/docs/javadoc")
+    classpath = configurations.allDeps
+    title = "LensKit $version"
+}
+
+// Set up JavaDoc configuration
+allprojects {
+    logger.info 'configuring JavaDoc for {}', name
+    dependencies {
+        support 'ch.raffael.pegdown-doclet:pegdown-doclet:1.1'
+    }
+    tasks.withType(Javadoc) { task ->
+        task.configure {
+            maxMemory = '128m'
+            onlyIf {
+                !travis.isActive() || travis.activeJdk == 'oraclejdk8'
+            }
+            doFirst {
+                for (file in configurations.support) {
+                    options.docletpath file
+                }
+            }
+            options {
+                doclet 'ch.raffael.doclets.pegdown.PegdownDoclet'
+
+                tags 'todo:a:To Do:', 'review:a:Review:'
+
+                tags "compat:pt:<a href=\"$webUrl/documentation/versioning/\">Compatibility</a>"
+
+                group 'General API', 'org.grouplens.lenskit', 'org.lenskit', 'org.lenskit.api'
+                group('Core', 'org.grouplens.lenskit.core',
+                      'org.grouplens.lenskit.basic', 'org.grouplens.lenskit.config',
+                      'org.lenskit.basic')
+                group('Data Structures', 'org.grouplens.lenskit.vectors',
+                      'org.grouplens.lenskit.collections', 'org.grouplens.lenskit.symbols',
+                      'org.grouplens.lenskit.scored', 'org.grouplens.lenskit.indexes',
+                      'org.lenskit.results')
+                group('Data Access', 'org.lenskit.data*',
+                      'org.lenskit.util.io')
+                group('Data Transformation',
+                      'org.grouplens.lenskit.baseline*', 'org.grouplens.lenskit.transform*',
+                      'org.grouplens.lenskit.vectors.*')
+                group('Recommender Implementations',
+                      'org.lenskit.baseline*',
+                      'org.lenskit.predict*', 'org.lenskit.knn*',
+                      'org.lenskit.mf*', 'org.lenskit.slopeone*')
+                group('Recommender Evaluation and Tooling',
+                      'org.grouplens.lenskit.eval*',
+                      'org.grouplens.lenskit.cli*',
+                      'org.lenskit.cli*',
+                      'org.lenskit.eval*')
+                group('Utility Classes',
+                      'org.grouplens.lenskit.util*',
+                      'org.lenskit.util*',
+                      'org.grouplens.lenskit.test*',
+                      'org.lenskit.test*',
+                      'org.lenskit.inject',
+                      'org.grouplens.lenskit.iterative')
+
+                links 'http://docs.oracle.com/javase/7/docs/api/'
+                links 'http://fastutil.di.unimi.it/docs/'
+                links "http://google.github.io/guava/releases/$guavaVersion/api/docs/"
+                links 'http://grapht.grouplens.org/apidocs/'
+
+                footer "<script type=\"text/javascript\" src=\"http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML\"></script>"
+            }
+        }
+    }
+}

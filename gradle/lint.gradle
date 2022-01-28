@@ -1,0 +1,114 @@
+/*
+ * LensKit, an open-source toolkit for recommender systems.
+ * Copyright 2014-2017 LensKit contributors (see CONTRIBUTORS.md)
+ * Copyright 2010-2014 Regents of the University of Minnesota
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining
+ * a copy of this software and associated documentation files (the
+ * "Software"), to deal in the Software without restriction, including
+ * without limitation the rights to use, copy, modify, merge, publish,
+ * distribute, sublicense, and/or sell copies of the Software, and to
+ * permit persons to whom the Software is furnished to do so, subject to
+ * the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be
+ * included in all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+ * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+ * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+ * IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+ * CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+ * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+ * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
+logger.lifecycle 'Enabling lint support in LensKit build'
+
+ext.lintMode = 'disabled'
+if (travis.isReleaseBuild()) {
+    logger.lifecycle 'Travis build on release branch'
+    ext.lintMode = 'enabled'
+}
+switch (getConfigProperty('lint', 'false').toLowerCase()) {
+    case 'true':
+        logger.info 'running in lint mode'
+        ext.lintMode = 'enabled'
+        break
+    case 'preview':
+        logger.info 'running in lint preview mode'
+        ext.lintMode = 'preview'
+        break
+}
+
+allprojects {
+    apply plugin: 'jacoco'
+    jacoco {
+        toolVersion = '0.8.1'
+    }
+}
+
+subprojects {
+    tasks.withType(Test).all { t ->
+        t.jacoco {
+            enabled = travis.isActive() || lintMode != 'disabled'
+        }
+    }
+    tasks.withType(JacocoReport).all { rpt ->
+        rpt.reports {
+            xml.enabled = true
+        }
+    }
+}
+
+task jacocoMergedReport(type: JacocoReport) {
+    ext.projects = []
+    onlyIf {
+        travis.isActive() || lintMode != 'disabled'
+    }
+    for (prj in subprojects) {
+        if (prj.name == 'lenskit-integration-tests') continue;
+        projects << prj
+        dependsOn prj.test
+        sourceSets prj.sourceSets.main
+        if (prj.sourceSets.test.allSource.files.isEmpty()) {
+            logger.info '{} has no tests', prj.name
+        } else {
+            logger.info 'aggregating tests from {}', prj.name
+            executionData prj.test
+        }
+    }
+    reports {
+        csv.enabled = false
+        xml.enabled = true
+        xml.destination = project.file("${buildDir}/reports/jacoco/report.xml")
+        html.destination = project.file("$reporting.baseDir/jacoco")
+    }
+}
+report.dependsOn jacocoMergedReport
+ciTest.dependsOn report
+
+sonarqube {
+    properties {
+        property "sonar.projectKey", "lenskit"
+        property "sonar.host.url", "https://sonarcloud.io"
+        property "sonar.sourceEncoding", "UTF-8"
+        if (System.getenv("SONAR_TOKEN")) {
+            property "sonar.login", System.getenv("SONAR_TOKEN")
+        } else if (project.hasProperty('sonar.login')) {
+            property "sonar.login", project.getProperty('sonar.login')
+        }
+        if (lintMode == 'preview') {
+            logger.info 'configuring Sonar for preview mode'
+            property "sonar.analysis.mode", "preview"
+            property "sonar.issuesReport.html.enable", "true"
+        }
+    }
+}
+
+tasks.sonarqube.onlyIf {
+    lintMode == 'preview' || (travis.isReleaseBuild() && travis.branch == 'master')
+}
+
+if (lintMode == 'enabled') {
+    ciPublish.dependsOn 'sonarqube'
+}
