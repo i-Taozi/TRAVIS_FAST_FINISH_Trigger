@@ -1,97 +1,70 @@
-<!--
-   ====================================================================
-   Licensed to the Apache Software Foundation (ASF) under one
-   or more contributor license agreements.  See the NOTICE file
-   distributed with this work for additional information
-   regarding copyright ownership.  The ASF licenses this file
-   to you under the Apache License, Version 2.0 (the
-   "License"); you may not use this file except in compliance
-   with the License.  You may obtain a copy of the License at
-     http://www.apache.org/licenses/LICENSE-2.0
-   Unless required by applicable law or agreed to in writing,
-   software distributed under the License is distributed on an
-   "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-   KIND, either express or implied.  See the License for the
-   specific language governing permissions and limitations
-   under the License.
-   ====================================================================
-   This software consists of voluntary contributions made by many
-   individuals on behalf of the Apache Software Foundation.  For more
-   information on the Apache Software Foundation, please see
-   <http://www.apache.org />.
- -->
-Apache HttpComponents Client
-============================
+# JRuby-OpenSSL
 
-Welcome to the HttpClient component of the Apache HttpComponents project.
+[JRuby-OpenSSL](https://github.com/jruby/jruby-openssl) is an add-on gem for
+[JRuby](http://jruby.org) that emulates the Ruby OpenSSL native library.
 
-[![Build Status](https://travis-ci.com/apache/httpcomponents-client.svg?branch=master)](https://travis-ci.com/apache/httpcomponents-client)
-[![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.apache.httpcomponents.client5/httpclient5/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.apache.httpcomponents.client5/httpclient5)
-[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+Under the hood uses the [Bouncy Castle Crypto APIs](http://www.bouncycastle.org/).
 
-Building Instructions
----------------------
+Each jruby-openssl gem release includes a certain version, usually the latest available, 
+of the library (namely BC Provider and PKIX/CMS/EAC/PKCS/OCSP/TSP/OPENSSL jars).
 
-For building from source instructions please refer to [BUILDING.txt](./BUILDING.txt).
+Please report bugs and incompatibilities (preferably with test-cases) to either
+the JRuby [mailing list][1] or the [bug tracker][2].
 
-Dependencies
-------------
+## Compatibility
 
-HttpClient main module requires Java 7 compatible runtime and
-depends on the following external libraries:
 
-* [Apache HttpComponents HttpCore](https://github.com/apache/httpcomponents-core)
-* [SLF4J API](http://www.slf4j.org/)
-* [Apache Commons Codec](https://github.com/apache/commons-codec)
+| JRuby-OpenSSL | JRuby compat  | JVM compat | supported BC |
+| ------------- |:-------------:| ----------:| ------------:|
+|         0.9.6 |   1.6.8-9.0.2 |  Java 6-8  |    1.47-1.50 |
+|        0.9.12 |   1.6.8-9.0.5 |  Java 6-8  |    1.47-1.52 |
+|        0.9.13 |   1.6.8-9.1.2 |  Java 6-8  |    1.49-1.52 |
+|        0.9.14 |   1.6.8-9.1.5 |  Java 6-8  |    1.49-1.54 |
+|        0.9.17 |   1.6.8-9.1.5 |  Java 6-8  |    1.50-1.54 |
+|      ~>0.9.18 |   1.6.8-9.1.x |  Java 6-8  |    1.50-1.55 |
+|        0.10.0 |  1.7.20-9.2.x |  Java 7-10 |    1.55-1.59 |
+|        0.10.3 |  1.7.20-9.2.x |  Java 7-11 |    1.56-1.62 |
 
-Other dependencies are optional.
+NOTE: backwards JRuby compatibility was not handled for versions <= **0.9.6** 
 
-(for detailed information on external dependencies please see [pom.xml](./pom.xml))
+## Security
 
-Licensing
----------
+JRuby-OpenSSL is an essential part of [JRuby](http://jruby.org), please report security 
+vulnerabilities to `security@jruby.org` as detailed on JRuby's [security page](http://jruby.org/security).
+ 
+Please note that most OpenSSL vulnerabilities do not effect JRuby since its not using 
+any of OpenSSL's C code, only Ruby parts (*.rb) are the same as in MRI's OpenSSL library. 
 
-Apache HttpComponents Client is licensed under the Apache License 2.0.
-See the files [LICENSE.txt](./LICENSE.txt) and [NOTICE.txt](./NOTICE.txt) for more information.
+## Testing
 
-Contact
--------
+[![Build Status][0]](http://travis-ci.org/jruby/jruby-openssl)
 
-- For general information visit the main project site at  
-  https://hc.apache.org/
-- For current status information visit the status page at  
-  https://hc.apache.org/status.html
-- If you want to contribute visit  
-  https://hc.apache.org/get-involved.html
+    rake jar:all # creates pom.xml and generates jopenssl.jar under lib
+    mvn test
 
-Cryptographic Software Notice
------------------------------
+will run (junit as well as ruby) tests and a some ruby tests against the default
+jruby version. to pick a different JRuby version run
 
-This distribution may include software that has been designed for use
-with cryptographic software. The country in which you currently reside
-may have restrictions on the import, possession, use, and/or re-export
-to another country, of encryption software. BEFORE using any encryption
-software, please check your country's laws, regulations and policies
-concerning the import, possession, or use, and re-export of encryption
-software, to see if this is permitted. See https://www.wassenaar.org/
-for more information.
+    mvn test -Djruby.versions=9.2.8.0
 
-The U.S. Government Department of Commerce, Bureau of Industry and
-Security (BIS), has classified this software as Export Commodity
-Control Number (ECCN) 5D002.C.1, which includes information security
-software using or performing cryptographic functions with asymmetric
-algorithms. The form and manner of this Apache Software Foundation
-distribution makes it eligible for export under the License Exception
-ENC Technology Software Unrestricted (TSU) exception (see the BIS
-Export Administration Regulations, Section 740.13) for both object
-code and source code.
+for running integration-tests the gem will be first installed and then the same
+tests run for each possible bouncy-castle version (see [listing][3]), run with
 
-The following provides more details on the included software that
-may be subject to export controls on cryptographic software:
+    mvn verify -P test-9.2.9.0,test-9.1.17.0
 
-> Apache HttpComponents Client interfaces with the
-> Java Secure Socket Extension (JSSE) API to provide
-> - HTTPS support
-> 
-> Apache HttpComponents Client does not include any
-> implementation of JSSE.
+or pick a bouncy-castle version
+
+    mvn verify -P test-9.2.9.0 -Dbc.versions=1.60
+
+NOTE: you can pick any jruby version which is on [central][4] or on [ci.jruby][5]
+
+## License
+
+(c) 2009-2020 JRuby distributed under EPL 1.0/GPL 2.0/LGPL 2.1
+
+[0]: https://secure.travis-ci.org/jruby/jruby-openssl.svg
+[1]: http://xircles.codehaus.org/projects/jruby/lists
+[2]: https://github.com/jruby/jruby/issues
+[3]: https://github.com/jruby/jruby-openssl/tree/master/integration
+[4]: http://central.maven.org/maven2/org/jruby/
+[5]: http://ci.jruby.org/snapshots/maven/org.jruby/
