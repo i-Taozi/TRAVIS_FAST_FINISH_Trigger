@@ -1,28 +1,32 @@
 <!--
-    Copyright (C) 2016 Gary Gregory. All rights reserved.
+   ====================================================================
+   Licensed to the Apache Software Foundation (ASF) under one
+   or more contributor license agreements.  See the NOTICE file
+   distributed with this work for additional information
+   regarding copyright ownership.  The ASF licenses this file
+   to you under the Apache License, Version 2.0 (the
+   "License"); you may not use this file except in compliance
+   with the License.  You may obtain a copy of the License at
+     http://www.apache.org/licenses/LICENSE-2.0
+   Unless required by applicable law or agreed to in writing,
+   software distributed under the License is distributed on an
+   "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+   KIND, either express or implied.  See the License for the
+   specific language governing permissions and limitations
+   under the License.
+   ====================================================================
+   This software consists of voluntary contributions made by many
+   individuals on behalf of the Apache Software Foundation.  For more
+   information on the Apache Software Foundation, please see
+   <http://www.apache.org />.
+ -->
+Apache HttpComponents Client
+============================
 
-    See the NOTICE.txt file distributed with this work for additional
-    information regarding copyright ownership.
+Welcome to the HttpClient component of the Apache HttpComponents project.
 
-    Licensed under the Apache License, Version 2.0 (the "License");
-    you may not use this file except in compliance with the License.
-    You may obtain a copy of the License at
-
-        http://www.apache.org/licenses/LICENSE-2.0
-
-    Unless required by applicable law or agreed to in writing, software
-    distributed under the License is distributed on an "AS IS" BASIS,
-    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-    See the License for the specific language governing permissions and
-    limitations under the License.
--->
-Apache HttpComponents Core
-==========================
-
-Welcome to the HttpCore component of the Apache HttpComponents project.
-
-[![Build Status](https://travis-ci.com/apache/httpcomponents-core.svg?branch=master)](https://travis-ci.com/apache/httpcomponents-core)
-[![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.apache.httpcomponents.core5/httpcore5/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.apache.httpcomponents.core5/httpcore5)
+[![Build Status](https://travis-ci.com/apache/httpcomponents-client.svg?branch=master)](https://travis-ci.com/apache/httpcomponents-client)
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.apache.httpcomponents.client5/httpclient5/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.apache.httpcomponents.client5/httpclient5)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
 Building Instructions
@@ -33,12 +37,21 @@ For building from source instructions please refer to [BUILDING.txt](./BUILDING.
 Dependencies
 ------------
 
-HttpCore requires Java 1.8 compatible runtime.
+HttpClient main module requires Java 7 compatible runtime and
+depends on the following external libraries:
+
+* [Apache HttpComponents HttpCore](https://github.com/apache/httpcomponents-core)
+* [SLF4J API](http://www.slf4j.org/)
+* [Apache Commons Codec](https://github.com/apache/commons-codec)
+
+Other dependencies are optional.
+
+(for detailed information on external dependencies please see [pom.xml](./pom.xml))
 
 Licensing
 ---------
 
-Apache HttpComponents Core is licensed under the Apache License 2.0.
+Apache HttpComponents Client is licensed under the Apache License 2.0.
 See the files [LICENSE.txt](./LICENSE.txt) and [NOTICE.txt](./NOTICE.txt) for more information.
 
 Contact
@@ -76,9 +89,9 @@ code and source code.
 The following provides more details on the included software that
 may be subject to export controls on cryptographic software:
 
-> Apache HttpComponents Core interfaces with the
+> Apache HttpComponents Client interfaces with the
 > Java Secure Socket Extension (JSSE) API to provide
 > - HTTPS support
 > 
-> Apache HttpComponents Core does not include any
+> Apache HttpComponents Client does not include any
 > implementation of JSSE.

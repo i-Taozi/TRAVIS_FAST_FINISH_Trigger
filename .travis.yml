@@ -17,27 +17,20 @@ language: java
 dist: trusty
 sudo: false
 
-services:
-  - docker
-
-jdk:
-  - openjdk11
-  - oraclejdk16
-  - openjdk-ea
+arch:
+  - amd64
+  - arm64
 
 addons:
   apt:
     packages:
       - maven
+      
+jdk:
+  - openjdk12
+  - oraclejdk16
+  - openjdk-ea
 
-install: skip
-script: mvn verify -B -P docker
-
-jobs:
-  fast_finish: true
-  include:
-    - name: arm64
-      arch: arm64
-      script: mvn verify -B
+matrix:
   allow_failures:
     - jdk: openjdk-ea

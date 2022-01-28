@@ -30,75 +30,100 @@
     <version>12</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
-  <groupId>org.apache.httpcomponents.core5</groupId>
-  <artifactId>httpcore5-parent</artifactId>
-  <name>Apache HttpComponents Core Parent</name>
+  <groupId>org.apache.httpcomponents.client5</groupId>
+  <artifactId>httpclient5-parent</artifactId>
+  <name>Apache HttpComponents Client Parent</name>
   <version>5.2-alpha1-SNAPSHOT</version>
-  <description>Apache HttpComponents Core is a library of components for building HTTP enabled services</description>
-  <url>https://hc.apache.org/httpcomponents-core-5.2.x/${project.version}/</url>
-  <inceptionYear>2005</inceptionYear>
+  <description>Apache HttpComponents Client is a library of components for building client side HTTP services</description>
+  <url>https://hc.apache.org/httpcomponents-client-5.0.x/${project.version}/</url>
+  <inceptionYear>1999</inceptionYear>
   <packaging>pom</packaging>
 
   <issueManagement>
     <system>Jira</system>
-    <url>https://issues.apache.org/jira/browse/HTTPCORE</url>
+    <url>https://issues.apache.org/jira/browse/HTTPCLIENT</url>
   </issueManagement>
 
   <scm>
-    <connection>scm:git:https://gitbox.apache.org/repos/asf/httpcomponents-core.git</connection>
-    <developerConnection>scm:git:https://gitbox.apache.org/repos/asf/httpcomponents-core.git</developerConnection>
-    <url>https://github.com/apache/httpcomponents-core/tree/${project.scm.tag}</url>
+    <connection>scm:git:https://gitbox.apache.org/repos/asf/httpcomponents-client.git</connection>
+    <developerConnection>scm:git:https://gitbox.apache.org/repos/asf/httpcomponents-client.git</developerConnection>
+    <url>https://github.com/apache/httpcomponents-client/tree/${project.scm.tag}</url>
     <tag>5.2-alpha1-SNAPSHOT</tag>
   </scm>
 
-  <distributionManagement>
+ <distributionManagement>
     <site>
       <id>apache.website</id>
       <name>Apache HttpComponents Website</name>
-      <url>scm:svn:https://svn.apache.org/repos/asf/httpcomponents/site/components/httpcomponents-core-5.2.x/LATEST/</url>
+      <url>scm:svn:https://svn.apache.org/repos/asf/httpcomponents/site/components/httpcomponents-client-5.2.x/LATEST/</url>
     </site>
   </distributionManagement>
 
-  <modules>
-    <module>httpcore5</module>
-    <module>httpcore5-h2</module>
-    <module>httpcore5-reactive</module>
-    <module>httpcore5-testing</module>
-  </modules>
-
   <properties>
-    <!-- Override parent 7 setting for deprecation (only - other settings stand)-->
     <maven.compiler.source>1.8</maven.compiler.source>
     <maven.compiler.target>1.8</maven.compiler.target>
-    <maven.compiler.showDeprecation>true</maven.compiler.showDeprecation>
+    <httpcore.version>5.1.1</httpcore.version>
+    <log4j.version>2.9.1</log4j.version>
+    <commons-codec.version>1.15</commons-codec.version>
     <conscrypt.version>2.2.1</conscrypt.version>
+    <ehcache.version>3.4.0</ehcache.version>
+    <memcached.version>2.12.3</memcached.version>
+    <slf4j.version>1.7.25</slf4j.version>
     <junit.version>4.13</junit.version>
     <mockito.version>3.10.0</mockito.version>
-    <slf4j.version>1.7.25</slf4j.version>
-    <log4j.version>2.8.2</log4j.version>
-    <rxjava.version>2.2.8</rxjava.version>
+    <jna.version>5.2.0</jna.version>
+    <hc.stylecheck.version>1</hc.stylecheck.version>
+    <rxjava.version>2.2.7</rxjava.version>
     <api.comparison.version>5.1</api.comparison.version>
-    <hc.animal-sniffer.signature.ignores>javax.net.ssl.SSLEngine,javax.net.ssl.SSLParameters</hc.animal-sniffer.signature.ignores>
   </properties>
 
   <dependencyManagement>
     <dependencies>
       <dependency>
-        <groupId>org.conscrypt</groupId>
-        <artifactId>conscrypt-openjdk-uber</artifactId>
-        <version>${conscrypt.version}</version>
+        <groupId>org.apache.httpcomponents.core5</groupId>
+        <artifactId>httpcore5</artifactId>
+        <version>${httpcore.version}</version>
       </dependency>
       <dependency>
-        <groupId>junit</groupId>
-        <artifactId>junit</artifactId>
-        <version>${junit.version}</version>
-        <scope>test</scope>
+        <groupId>org.apache.httpcomponents.core5</groupId>
+        <artifactId>httpcore5-h2</artifactId>
+        <version>${httpcore.version}</version>
       </dependency>
       <dependency>
-        <groupId>org.mockito</groupId>
-        <artifactId>mockito-core</artifactId>
-        <version>${mockito.version}</version>
-        <scope>test</scope>
+        <groupId>org.apache.httpcomponents.core5</groupId>
+        <artifactId>httpcore5-testing</artifactId>
+        <version>${httpcore.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.httpcomponents.core5</groupId>
+        <artifactId>httpcore5-reactive</artifactId>
+        <version>${httpcore.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.httpcomponents.client5</groupId>
+        <artifactId>httpclient5</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.httpcomponents.client5</groupId>
+        <artifactId>httpclient5</artifactId>
+        <version>${project.version}</version>
+        <classifier>tests</classifier>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.httpcomponents.client5</groupId>
+        <artifactId>httpclient5-cache</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.httpcomponents.client5</groupId>
+        <artifactId>httpclient5-fluent</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.httpcomponents.client5</groupId>
+        <artifactId>httpclient5-win</artifactId>
+        <version>${project.version}</version>
       </dependency>
       <dependency>
         <groupId>org.slf4j</groupId>
@@ -115,8 +140,64 @@
         <artifactId>log4j-core</artifactId>
         <version>${log4j.version}</version>
       </dependency>
+      <dependency>
+        <groupId>commons-codec</groupId>
+        <artifactId>commons-codec</artifactId>
+        <version>${commons-codec.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.conscrypt</groupId>
+        <artifactId>conscrypt-openjdk-uber</artifactId>
+        <version>${conscrypt.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.ehcache.modules</groupId>
+        <artifactId>ehcache-api</artifactId>
+        <version>${ehcache.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>net.spy</groupId>
+        <artifactId>spymemcached</artifactId>
+        <version>${memcached.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>net.java.dev.jna</groupId>
+        <artifactId>jna</artifactId>
+        <version>${jna.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>net.java.dev.jna</groupId>
+        <artifactId>jna-platform</artifactId>
+        <version>${jna.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>io.reactivex.rxjava2</groupId>
+        <artifactId>rxjava</artifactId>
+        <version>${rxjava.version}</version>
+        <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>junit</groupId>
+        <artifactId>junit</artifactId>
+        <version>${junit.version}</version>
+        <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.mockito</groupId>
+        <artifactId>mockito-core</artifactId>
+        <version>${mockito.version}</version>
+        <scope>test</scope>
+      </dependency>
     </dependencies>
   </dependencyManagement>
+
+  <modules>
+    <module>httpclient5</module>
+    <module>httpclient5-fluent</module>
+    <module>httpclient5-cache</module>
+    <module>httpclient5-win</module>
+    <module>httpclient5-testing</module>
+  </modules>
 
   <build>
     <plugins>
@@ -135,8 +216,9 @@
         <artifactId>maven-javadoc-plugin</artifactId>
         <configuration>
           <links>
-            <link>${project.url}/httpcore5/apidocs/</link>
-            <link>${project.url}/httpcore5-h2/apidocs/</link>
+            <link>https://hc.apache.org/httpcomponents-core-5.0.x/httpcore5/apidocs/</link>
+            <link>https://hc.apache.org/httpcomponents-core-5.0.x/httpcore5-h2/apidocs/</link>
+            <link>${project.url}/httpclient5/apidocs/</link>
           </links>
         </configuration>
       </plugin>
@@ -155,6 +237,22 @@
               <linkXRef>false</linkXRef>
               <sourceDirectories>
                 <sourceDirectory>${basedir}/src/main</sourceDirectory>
+              </sourceDirectories>
+            </configuration>
+            <goals>
+              <goal>checkstyle</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>validate-test</id>
+            <phase>validate</phase>
+            <configuration>
+              <configLocation>hc-stylecheck/default.xml</configLocation>
+              <headerLocation>hc-stylecheck/asl2.header</headerLocation>
+              <consoleOutput>true</consoleOutput>
+              <failsOnError>true</failsOnError>
+              <linkXRef>false</linkXRef>
+              <sourceDirectories>
                 <sourceDirectory>${basedir}/src/test</sourceDirectory>
               </sourceDirectories>
             </configuration>
@@ -219,17 +317,14 @@
         </executions>
         <configuration>
           <excludes>
-            <exclude>**/.checkstyle</exclude>
-            <exclude>**/.pmd</exclude>
-            <exclude>**/*.iml</exclude>
-            <exclude>**/.externalToolBuilders/**</exclude>
-            <exclude>maven-eclipse.xml</exclude>
             <exclude>src/docbkx/resources/**</exclude>
             <exclude>src/test/resources/*.truststore</exclude>
-            <exclude>src/test/resources/*.p12</exclude>
-            <exclude>**/.dockerignore</exclude>
-            <!-- Eclipse can leave some file in 'bin' when an imported project misconfigured. -->
-            <exclude>bin/**</exclude>
+            <exclude>src/test/resources/*.serialized</exclude>
+            <exclude>.checkstyle</exclude>
+            <exclude>.externalToolBuilders/**</exclude>
+            <exclude>maven-eclipse.xml</exclude>
+            <exclude>**/serial</exclude>
+            <exclude>**/index.txt</exclude>
           </excludes>
         </configuration>
       </plugin>
@@ -238,7 +333,6 @@
 
   <reporting>
     <plugins>
-
       <plugin>
         <artifactId>maven-project-info-reports-plugin</artifactId>
         <inherited>false</inherited>
@@ -262,27 +356,32 @@
         <version>${hc.javadoc.version}</version>
         <configuration>
           <quiet>true</quiet>
-          <links>
-            <link>${project.url}/httpcore5/apidocs/</link>
-            <link>${project.url}/httpcore5-h2/apidocs/</link>
-          </links>
           <notimestamp>true</notimestamp>
+          <links>
+            <link>https://hc.apache.org/httpcomponents-core-5.0.x/httpcore5/apidocs/</link>
+            <link>https://hc.apache.org/httpcomponents-core-5.0.x/httpcore5-h2/apidocs/</link>
+            <link>${project.url}/httpclient5/apidocs/</link>
+          </links>
           <groups>
             <group>
-              <title>Apache HttpCore HTTP/1.1</title>
-              <packages>org.apache.hc.core5*</packages>
+              <title>Apache HttpClient</title>
+              <packages>org.apache.hc.client5.http*</packages>
             </group>
             <group>
-              <title>Apache HttpCore HTTP/2</title>
-              <packages>org.apache.hc.core5.http2*</packages>
+              <title>Apache HttpClient Cache</title>
+              <packages>org.apache.hc.client5.http.cache*:org.apache.hc.client5.http.impl.cache*:org.apache.hc.client5.http.schedule:org.apache.hc.client5.http.impl.schedule*</packages>
             </group>
             <group>
-              <title>Apache HttpCore Reactive Streams Bindings</title>
-              <packages>org.apache.hc.core5.reactive*</packages>
+              <title>Apache HttpClient Fluent</title>
+              <packages>org.apache.hc.client5.http.fluent*</packages>
             </group>
             <group>
-              <title>Apache HttpCore Testing</title>
-              <packages>org.apache.hc.core5.testing*:org.apache.hc.core5.benchmark*</packages>
+              <title>Apache HttpClient Testing</title>
+              <packages>org.apache.hc.client5.testing*</packages>
+            </group>
+            <group>
+              <title>Apache HttpClient Windows features</title>
+              <packages>org.apache.hc.client5.http.impl.win*</packages>
             </group>
           </groups>
         </configuration>
