@@ -1,9 +1,5 @@
-*.gemspec.xml
-pkg
-*.jar
-target
-build.log
-.idea
-*.iml
-*.lock
-lib/org
+/bin/
+/target/
+/.settings/
+/.classpath
+/.project
