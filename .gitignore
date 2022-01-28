@@ -1,16 +1,11 @@
-### https://raw.github.com/github/gitignore/14b7566ce157ce95b07006466bacee160f242284/maven.gitignore
-
-site-content
-target/
-pom.xml.tag
-pom.xml.releaseBackup
-pom.xml.versionsBackup
-pom.xml.next
-release.properties
-
-
-/.settings/
-/.classpath
-/.project
-/nbproject/
-/commons-imaging.iml
+.classpath
+.project
+.settings
+.pydevproject
+.clover
+target
+maven-eclipse.xml
+.idea
+*.iml
+**/log4j2-debug.xml
+**/.checkstyle

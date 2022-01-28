@@ -14,23 +14,29 @@
 # limitations under the License.
 
 language: java
+dist: trusty
 sudo: false
-cache:
-  directories:
-    - $HOME/.m2
+
+services:
+  - docker
+
 jdk:
-  - openjdk8
   - openjdk11
-  - openjdk16
+  - oraclejdk16
   - openjdk-ea
 
-matrix:
-  fast_finish: true
+addons:
+  apt:
+    packages:
+      - maven
+
+install: skip
+script: mvn verify -B -P docker
+
+jobs:
+  include:
+    - name: arm64
+      arch: arm64
+      script: mvn verify -B
   allow_failures:
     - jdk: openjdk-ea
-
-script:
-  - mvn -V --no-transfer-progress
-
-after_success:
-  - mvn -V clean test jacoco:report coveralls:report -Ptravis-jacoco --no-transfer-progress
