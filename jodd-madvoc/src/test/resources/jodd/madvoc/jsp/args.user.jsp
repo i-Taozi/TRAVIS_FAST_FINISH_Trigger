@@ -1,1 +1,0 @@
-Hello ${user.username}, you are number ${user.id} or ${user.counter}.

@@ -1,15 +1,8 @@
-*/dist/
-*/out/
-*/build
-*.iml
-.idea
-/user.*
-.gradle
-target
-/jodd-bom/jodd-bom.txt.asc
+target/
+/.classpath
+/.project
+/.settings/
 
-.project
-.classpath
-.settings
-/.coveralls.yml
-build
+# intellij files
+.idea/
+/*.iml

@@ -1,2 +1,0 @@
-Sess: ${sessionScope.sessionName}
->${sid}
