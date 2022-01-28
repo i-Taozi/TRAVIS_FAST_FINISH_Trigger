@@ -1,20 +1,24 @@
-*.swp
-.DS_Store
-modules/*/bin
-.vscode/
-# IDEA Ignores
+# Eclipse #
+###########
+.classpath
+.project
+.settings
+*/bin
+
+# Maven #
+#########
+target
+release.properties
+*.releaseBackup
+*.versionsBackup
+
+# IntelliJ IDEA #
+#################
+.idea
 *.iml
 *.ipr
 *.iws
-.libs/
-.idea/
-out/
-# Eclipse Ignores
-.classpath
-.metadata
-.project
-.settings/
-Servers
-# Gradle Ignores
-.gradle
-build/
+
+# OS X #
+########
+.DS_Store

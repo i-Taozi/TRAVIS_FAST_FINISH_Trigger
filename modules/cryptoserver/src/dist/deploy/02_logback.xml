@@ -1,3 +1,0 @@
-<logback name="logback-config" class="org.jpos.logging.logback.LogbackConfigurator">
-    <property name="config-resource" value="file:cfg/logback.xml"/>
-</logback>

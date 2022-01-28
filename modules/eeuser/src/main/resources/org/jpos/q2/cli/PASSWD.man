@@ -1,2 +1,0 @@
-usage: adduser <nick>
- -p,--password <arg>   The password (mandatory)

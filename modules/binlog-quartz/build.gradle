@@ -1,7 +1,0 @@
-description = 'jPOS-EE :: BinLog Quartz Module'
-
-dependencies {
-    api project(':modules:binlog')
-    api project(':modules:quartz')
-}
-

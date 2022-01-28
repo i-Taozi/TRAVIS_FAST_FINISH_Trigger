@@ -1,6 +1,0 @@
-description = 'jPOS-EE :: Microsoft SQL Server support'
-
-dependencies {
-    api project(':modules:dbsupport')
-    api libraries.jdbcMssql
-}

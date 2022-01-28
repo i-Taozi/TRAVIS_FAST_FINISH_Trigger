@@ -1,39 +1,44 @@
-sudo: required
-dist: xenial
-language: java
-jdk:
-  - openjdk8
-  - openjdk9
-  - openjdk10
-  - openjdk11
-  - openjdk12
-  - openjdk13
-  - openjdk14
-  - openjdk15
-before_script:
-- echo $JAVA_OPTS
-- export JAVA_OPTS=-Xmx1G
-install: true
-script:
-- sudo apt-get update && sudo apt-get install oracle-java8-installer
-- java -version
-script:
-- TERM=dumb ./gradlew assemble check --info --stacktrace
-- cd modules/minigl && TERM=dumb ../../gradlew clean test --rerun-tasks -Dtest.minigl_db_driver=postgres
-after_success: ".travis/update-gh-pages.sh"
-after_failure: ".travis/update-gh-pages.sh"
+dist: trusty
 env:
   global:
-  - secure: hXRjDTr170qZNw4tCapT6pUAHi2vbFa1vB9BKA8AD/jHWivNehgBJBLsqM9KmWc0PAwevzB0iH6K+WBBH7x98d7J3K0R6Mdz3AMNK48wN6UWOXJtMPmbi2+deDinDracE0fH3zRFpZygaqcSmGZlkr//jKB8ODIO+MBETTlb0dc=
-notifications:
-  slack:
-    secure: HikbVVS4pi1VI1q0W0Kkh7NMXmrtDFw+ulqBpKA4VT+2LyOxsF18Bg+j40+hNonfTRPTuBYuOuU0wA79u1GBZRKdm2Ky3CGd1rohG53ONOk3I+J1K1W0hfzITZ+nkrB//+oAYJBADhZJQZ8PwjbhA4wxsz+k4XOaScwbTiemt8Y=
+  - secure: Izz+xWjTzSTMwJZJ0eFGVk0YTWnDWbXfqn3KShzevSeUIm/qxrGs9by/ATc1OouvM209ZLAKu6QBamrOEztfswZFFOgE2bNoF62Wh8X4rpeKBXrrqbsMZigcV4Y1dt/cMxioCLNSdEerQ252RWL8ILNW6zEo5/Tg82/sZmudIjE=
+  - secure: by3EqA+ceJedtsog127U7eqyZMMokxiSJuFwS9XUQ81BqvThmxNOu6ZS+oE1XC0XHJ5dfzO1bWlzedChP1bSM8Tq+tmeddtnbMgcdLDgQD2tLSncVBZerjJuN4P+wVOVKHjK0uaXKxH3To1q3psSxAPUJF0Hem6BOOeZoFZsui4=
+  - secure: ipsjLktGbYJhOu6aEuikws80SRfKxQ17I4Vyn92DRh6T/itITBzf8npH5hvPC/A1kUct3ZcxibkMFmC9DZ5qJrMeR2jSYRY2UW3GDAeNBal1flQAItGwcTuDVrxowS5d1QhCT0I/oMZNCScRkgLorZARCd62vGqD8xQCvMXlqis=
+  - secure: NESSqQhlo74FQix3wQNU1Gatk1igv3w4o0EIfQq5aXEEGoaLdDnF2hGdivkEINYzM3pEU6cpy5+N+njcONGKS9NnBEe8tA2Ngk1cKW+I/rScwS4jCBbA7FpdOagecWB3kb62uL8qS7Iu50v6HrKPjakioFwm9gAu2TE8WLgx0Pg=
+language: java
 matrix:
-  fast_finish: true
   include:
-    - jdk: oraclejdk8
-      dist: trusty
+  - jdk: openjdk8
+    env: SHOULD_DEPLOY=true
+  - jdk: oraclejdk8
+    env: SHOULD_DEPLOY=false
+  - jdk: openjdk11
+    env: SHOULD_DEPLOY=false
+  - jdk: openjdk13
+    env: SHOULD_DEPLOY=false
+  - jdk: openjdk-ea
+    env: SHOULD_DEPLOY=false
   allow_failures:
-    - jdk: openjdk9
-    - jdk: openjdk10
-
+  - jdk: openjdk13
+  - jdk: openjdk-ea
+before_install:
+- bash .travis/deploy-codesigning.sh
+install:
+- mvn -N io.takari:maven:wrapper -Dmaven=3.5.0
+- java -version && javac -version && ./mvnw -version -B
+before_script:
+- ./mvnw com.offbytwo.maven.plugins:maven-dependency-plugin:3.1.1.MDEP568:go-offline -DexcludeGroupIds=com.github.dozermapper -B
+script:
+- ./mvnw clean install -B
+after_success:
+- ./mvnw integration-test -Prun-benchmarks -f tests/dozer-jmh-tests/pom.xml
+deploy:
+  provider: script
+  script: bash .travis/deploy.sh
+  skip_cleanup: true
+  on:
+    tags: false
+    all_branches: true
+cache:
+  directories:
+  - $HOME/.m2
