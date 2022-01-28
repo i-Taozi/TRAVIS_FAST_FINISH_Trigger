@@ -33,6 +33,7 @@ notifications:
   slack:
     secure: opKU+4jJWYuhq5STCVW2cvxEq/1/xY17xpxGKoJXWA+RbhPo+viT5uJLmb67HwdmvQNwUVAW6uOLO7SDOmpGh5oAwpI74DrA0y6uEzN6GgzutZDBY5oCMRYCGi/5xNOuzDdsryDtSJvXWLxyCysnTrAqqQ9XdOnRK/ZqSIeQg+s=
 matrix:
+  fast_finish: true
   include:
     - jdk: oraclejdk8
       dist: trusty
