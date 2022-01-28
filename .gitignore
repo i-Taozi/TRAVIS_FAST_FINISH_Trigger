@@ -1,15 +1,15 @@
-target/
-/jsign-gradle-plugin/.gradle
-/jsign-gradle-plugin/build
-dependency-reduced-pom.xml
-
-# IntelliJ files
+*/dist/
+*/out/
+*/build
 *.iml
-*.ipr
-*.iws
-/.idea
+.idea
+/user.*
+.gradle
+target
+/jodd-bom/jodd-bom.txt.asc
 
-# eclipse files
-.settings
-.classpath
 .project
+.classpath
+.settings
+/.coveralls.yml
+build

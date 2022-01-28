@@ -1,0 +1,13 @@
+
+ext.moduleName = 'Jodd Core'
+ext.moduleDescription = 'Jodd Core tools and huge number of utilities.'
+
+dependencies {
+	api 'org.jodd:jodd-util:6.0.0'
+
+	testImplementation lib.junit5
+	testImplementation 'org.webjars:jquery:3.4.1'
+	testImplementation 'commons-codec:commons-codec:1.13'
+
+	jmhImplementation 'net.openhft:smoothie-map:1.3'
+}

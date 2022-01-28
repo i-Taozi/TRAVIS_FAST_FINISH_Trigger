@@ -1,0 +1,16 @@
+ext.moduleName = 'Jodd HTMLStapler'
+ext.moduleDescription = 'Jodd HtmlStapler.'
+
+dependencies {
+	api project(':jodd-core')
+
+	api project(':jodd-servlet')
+	api 'org.slf4j:slf4j-api:1.7.30'
+
+	api 'org.jodd:jodd-lagarto:6.0.2'
+
+	provided lib.servlet
+	provided lib.jsp
+
+	testImplementation lib.junit5
+}

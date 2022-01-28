@@ -1,0 +1,22 @@
+
+ext.moduleName = 'Jodd Madvoc'
+ext.moduleDescription = 'Jodd Madvoc is elegant web MVC framework that uses CoC and annotations in a pragmatic way to simplify web application development.'
+
+dependencies {
+	api project(':jodd-core')
+	api project(':jodd-servlet')
+	api 'org.jodd:jodd-json:6.0.2'
+	api 'org.jodd:jodd-props:6.0.1'
+	api 'org.jodd:jodd-petite:6.0.0'
+	api 'org.jodd:jodd-proxetta:6.0.0'
+	api 'org.slf4j:slf4j-api:1.7.30'
+
+	provided lib.servlet
+	provided lib.jsp
+
+	testImplementation 'org.jodd:jodd-http:6.0.2'
+	testImplementation project(':jodd-core').sourceSets.test.output
+	testImplementation lib.junit5
+	testImplementation lib.tomcat_embed
+	testImplementation lib.mockito
+}

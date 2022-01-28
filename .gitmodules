@@ -1,0 +1,27 @@
+[submodule "jodd-lagarto"]
+	path = jodd-lagarto
+	url = https://github.com/oblac/jodd-lagarto
+[submodule "jodd-util"]
+	path = jodd-util
+	url = https://github.com/oblac/jodd-util
+[submodule "jodd-mail"]
+	path = jodd-mail
+	url = https://github.com/oblac/jodd-mail
+[submodule "jodd-json"]
+	path = jodd-json
+	url = https://github.com/oblac/jodd-json
+[submodule "jodd-http"]
+	path = jodd-http
+	url = https://github.com/oblac/jodd-http
+[submodule "jodd-props"]
+	path = jodd-props
+	url = https://github.com/oblac/jodd-props
+[submodule "jodd-proxetta"]
+	path = jodd-proxetta
+	url = https://github.com/oblac/jodd-proxetta
+[submodule "jodd-petite"]
+	path = jodd-petite
+	url = https://github.com/oblac/jodd-petite
+[submodule "jodd-db"]
+	path = jodd-db
+	url = https://github.com/oblac/jodd-db

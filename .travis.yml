@@ -1,13 +1,25 @@
+sudo: required
 language: java
+
 jdk:
-  - openjdk-ea
-  - openjdk11
   - openjdk8
+#  - openjdk11
 
 matrix:
-  fast_finish: true
   allow_failures:
-    - jdk: openjdk-ea
+    - jdk: openjdk11
+
+install:
+  - TERM=dumb ./gradlew assemble
+
+#before_script:
+#  - sleep 15
+
+script:
+  - TERM=dumb ./gradlew testAll codeCoverageReport --stacktrace
 
 after_success:
-  - mvn clean test jacoco:report-aggregate coveralls:report
+  - bash <(curl -s https://codecov.io/bash)
+
+#after_failure:
+#  - TERM=dumb ./gradlew build testAll --stacktrace
