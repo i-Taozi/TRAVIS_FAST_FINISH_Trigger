@@ -24,6 +24,7 @@ before_script:
 script: jruby -rbundler/setup -S rake test
 
 matrix:
+  fast_finish: true
   allow_failures:
     - rvm: jruby-head
     - script: jruby -rbundler/setup -S rake integration:install integration:test
