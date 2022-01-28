@@ -3,8 +3,9 @@ if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
   pwd
   ls -l 
   #copy data we're interested in to other place
-  cp -R jpos/build/reports/tests $HOME/tests
-  cp -R jpos/build/reports/pmd $HOME/pmd
+  mkdir -p $HOME/tests
+  cp -R modules/eeuser/build/reports $HOME/tests/eeuser
+  cp -R modules/minigl/build/reports $HOME/tests/minigl
 
   #go to home and setup git
   cd $HOME
@@ -12,12 +13,11 @@ if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
   git config --global user.name "Travis"
 
   #using token clone gh-pages branch
-  git clone --quiet --branch=gh-pages https://${GH_TOKEN}@github.com/jpos/jPOS.git gh-pages > /dev/null 2>&1
+  git clone --quiet --branch=gh-pages https://${GH_TOKEN}@github.com/jpos/jPOS-EE.git gh-pages > /dev/null 2>&1
 
   #go into diractory and copy data we're interested in to that directory
   cd gh-pages
   cp -Rf $HOME/tests/* .
-  mkdir -p pmd && cp -Rf $HOME/pmd/* pmd
 
   #add, commit and push files
   git add -f .

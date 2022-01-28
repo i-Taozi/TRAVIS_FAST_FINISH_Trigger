@@ -1,3 +1,0 @@
-jPOS comes with several channel implementations, most of which 
-are available in the +src/main/java/org/jpos/iso/channel+ directory.
-

@@ -1,58 +1,49 @@
-import org.gradle.internal.os.OperatingSystem
-apply from: 'jpos/libraries.gradle'
+apply from: 'libraries.gradle'
+
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'org.owasp:dependency-check-gradle:5.2.1'
+    }
+}
+
 
 allprojects {
     apply plugin: 'idea'
     apply plugin: 'eclipse'
+    apply plugin: 'org.owasp.dependencycheck'
+
+    group = 'org.jpos.ee'
+    version = '2.2.8-SNAPSHOT'
 }
 
 subprojects {
     apply plugin: 'java-library'
     apply plugin: 'maven-publish'
     apply plugin: 'signing'
-    apply plugin: 'pmd'
-    apply plugin: 'jacoco'
-    apply plugin: 'project-report'
-
-    group = 'org.jpos'
-    version = '2.1.7-SNAPSHOT'
+    sourceCompatibility = 1.8
+    targetCompatibility = 1.8
     [ compileJava, compileTestJava, javadoc ]*.options*.encoding = 'UTF-8'
     def isSnapshot = version.contains("SNAPSHOT")
     def mavenCentralRepo = isSnapshot ?
         'https://oss.sonatype.org/content/repositories/snapshots/' :
         'https://oss.sonatype.org/service/local/staging/deploy/maven2';
 
-    configurations.implementation.transitive = true
+    project.archivesBaseName="jposee-${project.name}"
     javadoc.failOnError = false
-    pmd.ignoreFailures = true
 
-    sourceCompatibility = 1.8
-    targetCompatibility = 1.8
-    repositories {
-        mavenCentral()
-        maven { url 'https://jpos.org/maven' }
-        mavenLocal()
-    }
-    if (project.hasProperty("lint")) {
-      // gradle -Plint ...
-      tasks.withType(JavaCompile) {
-        options.compilerArgs << "-Xlint" 
-      } 
-    }
     java {
-        withJavadocJar()
-        withSourcesJar()
+      withSourcesJar()
     }
+
     publishing {
         publications {
             mavenJava(MavenPublication) {
                 pom {
                     name = 'jPOS Project'
-                    description = """
-    jPOS is an ISO-8583 based financial transaction 
-    library/framework that can be customized and 
-    extended in order to implement financial interchanges.
-  """
+                    description = "jPOS Extended Edition"
                     url = "http://jpos.org"
                     organization {
                         name = 'jPOS.org'
@@ -60,12 +51,12 @@ subprojects {
                     }
                     issueManagement {
                         system = 'Github Issues'
-                        url = 'https://github.com/jpos/jPOS/issues'
+                        url = 'https://github.com/jpos/jPOS-EE/issues'
                     }
                     scm {
-                        url = "http://github.com/jpos/jPOS"
-                        connection = "scm:git:https://github.com/jpos/jPOS.git"
-                        developerConnection = "scm:git:git@github.com:jpos/jPOS.git"
+                        url = "http://github.com/jpos/jPOS-EE"
+                        connection = "scm:git:https://github.com/jpos/jPOS-EE.git"
+                        developerConnection = "scm:git:git@github.com:jpos/jPOS-EE.git"
                     }
                     licenses {
                         license {
@@ -83,9 +74,28 @@ subprojects {
                         }
                     }
                 }
-                groupId = 'org.jpos'
-                artifactId = 'jpos'
+
+                groupId = 'org.jpos.ee'
+                artifactId = 'jposee'
                 from components.java
+                artifactId="jposee-${project.name}"
+
+/*
+                pom.withXml {
+                    asNode().dependencies.'*'.findAll() {
+                        it.scope.text() == 'compile' && project.configurations.compile.allDependencies.find { dep ->
+                            dep.name == it.artifactId.text()
+                        }
+                    }.each() {
+                        it.scope*.value = 'implementation'
+                    }
+                    asNode().dependencies.'*'.findAll() {
+                        if (it.groupId.text() == 'org.jpos.ee') {
+                            it.artifactId*.value = "jposee-${it.artifactId.text()}"
+                        }
+                    }
+                }
+*/
             }
         }
         repositories {
@@ -103,66 +113,52 @@ subprojects {
                 }
             }
         }
-    }
+    } // publishing
 
     signing {
         required { !isSnapshot }
         sign publishing.publications.mavenJava
     }
 
-    javadoc {
-        configure(options) {
-            windowTitle = "jPOS ${project.version}"
-            header = "<b>jPOS ${project.version}</b>"
-            linkSource = true
-            links(
-                'https://docs.oracle.com/javase/8/docs/api'
-            )
-            tags(
-                'apiNote:a:API Note:',
-                'implSpec:a:Implementation Requirements:',
-                'implNote:a:Implementation Note:'
-            )
-        }
-    }
 
     test {
         useJUnitPlatform()
-        testLogging {
-            events "passed", "skipped", "failed"
-        }
-        systemProperty 'user.language', 'en'
-        if (!(System.getenv("GITHUB_ACTIONS") != null && System.getenv("GITHUB_ACTIONS") == "true" &&
-                (OperatingSystem.current().isMacOsX() || OperatingSystem.current().isWindows()))) {
-            maxParallelForks = Runtime.runtime.availableProcessors()
-        }
+        maxParallelForks = Runtime.runtime.availableProcessors()
     }
-    jacoco {
-        toolVersion = '0.8.6'
+
+
+    repositories {
+        mavenCentral()
+        maven { url 'https://jpos.org/maven' }
+        maven { url 'https://download.oracle.com/maven' }
+        maven { url 'https://maven.vaadin.com/vaadin-addons' }
+        maven { url 'https://maven.vaadin.com/vaadin-prereleases' }
+        jcenter()
+        mavenLocal()
+    }
+
+    dependencies {
+        testImplementation libraries.junit
+        //Java 10 support
+        testImplementation('com.sun.xml.bind:jaxb-impl:2.1.2')
+        testImplementation('com.sun.activation:javax.activation:1.2.0')
+        testImplementation('javax.xml.bind:jaxb-api:2.3.0')
+    }
+
+    task allDeps(type: DependencyReportTask) {}
+} // subprojects
+
+task allSources(type: Jar,dependsOn: subprojects.assemble) {
+    archiveBaseName = 'jposee-sources'
+    from subprojects.collect { project ->
+        project.sourceSets.main.allSource
     }
 }
 
 // Configure IDEA to use Git
-idea {
-    project {
-        ipr {
-            withXml { 
-                provider -> provider.node.component.find { 
-                    it.@name == 'VcsDirectoryMappings' 
-                }.mapping.@vcs = 'Git' 
-            }
-        }
-        languageLevel = '1.8'
-    }
-}
-
-task aggregatedJavadoc (type: Javadoc, description: "Aggregated Javadocs") {
-    source subprojects.collect {project ->
-        project.sourceSets.main.allJava
-    }
-    destinationDir = new File(buildDir, 'docs/javadoc')
-    classpath = files(subprojects.collect {project ->
-        project.sourceSets.main.compileClasspath})
-    failOnError = false
+idea.project.ipr {
+  withXml { provider ->
+    provider.node.component.find { it.@name == 'VcsDirectoryMappings' }.mapping.@vcs = 'Git'
+  }
 }
 

@@ -1,0 +1,4 @@
+usage: adduser <nick>
+ -n,--name <arg>       User's full name
+ -p,--password <arg>   The password
+ -r,--role <arg>       User role

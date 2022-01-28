@@ -51,7 +51,7 @@
 
     <xsl:param name="paper.type" select="'A4'"/>
     <xsl:param name="body.font.master">10</xsl:param>
-    <xsl:param name="hyphenate">true</xsl:param>
+    <xsl:param name="hyphenate">false</xsl:param>
     <xsl:param name="alignment">justify</xsl:param>
     <xsl:param name="body.font.size">
       <xsl:value-of select="$body.font.master"/><xsl:text>pt</xsl:text>

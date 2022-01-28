@@ -1,8 +1,5 @@
 sudo: required
 dist: xenial
-addons:
-  apt:
-    packages: haveged
 language: java
 jdk:
   - openjdk8
@@ -14,29 +11,28 @@ jdk:
   - openjdk14
   - openjdk15
 before_script:
-  - echo $JAVA_OPTS
-  - export JAVA_OPTS=-Xmx4G
+- echo $JAVA_OPTS
+- export JAVA_OPTS=-Xmx1G
 install: true
 script:
-  - java -version
-  - ulimit -a
-  - TERM=dumb ./gradlew jpos:assemble jpos:check jpos:dependencyCheckAnalyze --info
-deploy:
-  provider: script
-  script: bash .travis/update-gh-pages.sh
-  on:
-    branch: master
+- sudo apt-get update && sudo apt-get install oracle-java8-installer
+- java -version
+script:
+- TERM=dumb ./gradlew assemble check --info --stacktrace
+- cd modules/minigl && TERM=dumb ../../gradlew clean test --rerun-tasks -Dtest.minigl_db_driver=postgres
+after_success: ".travis/update-gh-pages.sh"
+after_failure: ".travis/update-gh-pages.sh"
 env:
   global:
-    secure: ZWDnTNCsRaxOV4hPiWslj1ieKwYjuxBA4COHFVApxr8TBcQEwhPAzo+b+WbDsi45rJkk/Ee9Du0+mbT//x3TTK78fePg6EDk0WBSmWRUFC3eITgTmUJe7Qh5VOUZOdz9vFaYH8080/CB4VyygJuSp2XLte+S/MVSoXVVABrNggU=
+  - secure: hXRjDTr170qZNw4tCapT6pUAHi2vbFa1vB9BKA8AD/jHWivNehgBJBLsqM9KmWc0PAwevzB0iH6K+WBBH7x98d7J3K0R6Mdz3AMNK48wN6UWOXJtMPmbi2+deDinDracE0fH3zRFpZygaqcSmGZlkr//jKB8ODIO+MBETTlb0dc=
 notifications:
   slack:
-    secure: opKU+4jJWYuhq5STCVW2cvxEq/1/xY17xpxGKoJXWA+RbhPo+viT5uJLmb67HwdmvQNwUVAW6uOLO7SDOmpGh5oAwpI74DrA0y6uEzN6GgzutZDBY5oCMRYCGi/5xNOuzDdsryDtSJvXWLxyCysnTrAqqQ9XdOnRK/ZqSIeQg+s=
+    secure: HikbVVS4pi1VI1q0W0Kkh7NMXmrtDFw+ulqBpKA4VT+2LyOxsF18Bg+j40+hNonfTRPTuBYuOuU0wA79u1GBZRKdm2Ky3CGd1rohG53ONOk3I+J1K1W0hfzITZ+nkrB//+oAYJBADhZJQZ8PwjbhA4wxsz+k4XOaScwbTiemt8Y=
 matrix:
-  fast_finish: true
   include:
     - jdk: oraclejdk8
       dist: trusty
   allow_failures:
     - jdk: openjdk9
     - jdk: openjdk10
+

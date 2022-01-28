@@ -1,0 +1,12 @@
+description = 'jPOS-EE :: Rest'
+
+dependencies {
+    api project(':modules:core')
+    api project(':modules:txn')
+    api "javax.ws.rs:javax.ws.rs-api:${jaxrsVersion}"
+    api jsonSchemaValidatorLibs
+    api libraries.commons_lang
+}
+
+apply from: "${rootProject.projectDir}/jpos-app.gradle"
+

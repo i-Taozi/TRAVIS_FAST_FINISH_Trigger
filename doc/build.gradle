@@ -4,8 +4,8 @@ apply plugin: 'idea'
 import org.jpos.buildtools.docs.DocbookPdf
 import org.jpos.buildtools.docs.DocbookHtml
 
-sourceCompatibility = 1.8
-targetCompatibility = 1.8
+sourceCompatibility = 1.6
+targetCompatibility = 1.6
 
 task copySources(type: Sync) {
     from "${projectDir}/src/asciidoc"
@@ -21,8 +21,8 @@ task copyWebResources(type: Sync) {
 
 task a2x(dependsOn: copySources) {
   doLast {
-    def inFile = "${buildDir}/docbook/source/master.adoc"
-    def outFile = "${buildDir}/docbook/source/master.xml"
+    def inFile = "${buildDir}/docbook/source/book.adoc"
+    def outFile = "${buildDir}/docbook/source/book.xml"
     def cmd = "asciidoctor -r asciidoctor-diagram --safe -a docinfo -a lang=en -d book -b docbook5 -o ${outFile} ${inFile}"
     def proc = cmd.execute(null, file(inFile).parentFile)
     proc.in.eachLine { line -> println line }
@@ -33,11 +33,10 @@ task a2x(dependsOn: copySources) {
 
 task createPdf(type: DocbookPdf) {
     group = 'Toolchain'
-    description = 'Generates PDF docbook output.'
-    
+    setDescription('Generates PDF docbook output.')
     extension = 'fo'
     dependsOn a2x
-    sourceFileName 'master.xml'
+    sourceFileName 'book.xml'
     sourceDirectory "${buildDir}/docbook/source/" as File
     docsDir "${buildDir}/docbook/pdf/" as File
     stylesheet "${projectDir}/src/xslt/fo.xsl" as File
@@ -45,9 +44,9 @@ task createPdf(type: DocbookPdf) {
 
 task createHtml(type: DocbookHtml) {
     group = 'Toolchain'
-    description = 'Generates HTML docbook output.'
+    setDescription('Generates HTML docbook output.')
     dependsOn a2x,copyWebResources
-    sourceFileName "master.xml"
+    sourceFileName "book.xml"
     sourceDirectory "${buildDir}/docbook/source/" as File
     docsDir "${buildDir}/docbook/html/" as File
     stylesheet "${projectDir}/src/xslt/html.xsl" as File
@@ -56,10 +55,9 @@ task createHtml(type: DocbookHtml) {
 task viewHtml (dependsOn: createHtml, description: 'Open HTML docbook outout in default browser', group: 'Toolchain') {
   doLast {
     Class.forName("java.awt.Desktop").newInstance().browse(
-        new File("${buildDir}/docbook/html", 'master.html').toURI())
+        new File("${buildDir}/docbook/html", 'book.html').toURI())
   }
 }
-
 
 task viewPdf (dependsOn: createPdf , description: 'Open PDF docbook outout in default viewer', group: 'Toolchain') {
   doLast {

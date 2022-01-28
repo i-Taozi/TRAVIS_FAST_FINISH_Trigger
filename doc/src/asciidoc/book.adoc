@@ -1,0 +1,107 @@
+jPOS Extended Edition
+=====================
+:jposee_version: 2.2.7-SNAPSHOT
+:revdate: {localdate}
+:revnumber: {jposee_version}
+:toc:
+:toclevels: 3
+:doctype: book
+:author: jPOS Software SRL
+:email: support@jpos.org
+:revdate: {localdate}
+:revnumber: 2.2.7-SNAPSHOT
+:source-highlighter: rouge
+:listing-caption: Listing
+:pdf-page-size: A4
+:icons: font
+:pdf-theme: jposbook
+:pdf-themesdir: {docdir}
+:sectnums:
+:sectnumlevels: 5
+
+= Introduction
+
+include::overview.adoc[]
+
+include::contributing.adoc[]
+include::getting_started.adoc[]
+include::tutorial.adoc[]
+
+= Modules
+
+== Introduction to modules
+
+include::introduction_module.adoc[]
+
+== Core Modules
+
+include::module_core.adoc[]
+include::module_txn.adoc[]
+include::module_qi.adoc[]
+
+== Database Support
+
+include::module_dbsupport.adoc[]
+include::module_database_support.adoc[]
+include::module_dbflyway.adoc[]
+
+== Binary Log
+include::module_binlog.adoc[]
+
+== Rest Support
+include::module_qrest.adoc[]
+include::module_http_client.adoc[]
+
+== Tools
+
+include::module_freemarker_decorator.adoc[]
+include::module_groovy.adoc[]
+include::module_cryptoservice.adoc[]
+include::module_cryptoserver.adoc[]
+
+== Simulators
+
+include::module_server_simulator.adoc[]
+include::module_client_simulator.adoc[]
+
+// == Application components
+//------------------------------------------------------------
+// ** UNIMPLEMENTED **
+//
+// - MiniGL
+// - Result Code
+// - Store and Forward (SAF)
+// - Sysconfig
+// - Things
+//------------------------------------------------------------
+
+== Operation services
+
+include::module_sshd.adoc[]
+
+== Contributed modules
+ 
+include::module_fsdmsgX.adoc[]
+
+//------------------------------------------------------------
+// ** UNIMPLEMENTED **
+//
+// - Status
+// - Syslog
+// - Mail
+//------------------------------------------------------------
+
+= jPOS-EE Entities
+
+include::entities/sysconfig.adoc[]
+include::entities/syslog.adoc[]
+include::entities/eeuser.adoc[]
+include::entities/seqno.adoc[]
+
+= Appendices
+
+include::appendix_copyright.adoc[]
+include::appendix_license.adoc[]
+include::appendix_CLA.adoc[]
+include::appendix_CCLA.adoc[]
+
