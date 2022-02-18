@@ -1,162 +1,115 @@
-# JMock Library
-[![Build Status](https://travis-ci.org/jmock-developers/jmock-library.svg?branch=jmock2)](https://travis-ci.org/jmock-developers/jmock-library)
-[![Maven Central](https://img.shields.io/maven-central/v/org.jmock/jmock.svg?label=Maven%20Central)](https://mvnrepository.com/artifact/org.jmock)
+[![Maven Central](https://img.shields.io/maven-central/v/com.zenjava/javafx-maven-plugin.svg)](https://maven-badges.herokuapp.com/maven-central/com.zenjava/javafx-maven-plugin)
 
-# Maven
+
+
+JavaFX Maven Plugin
+===================
+
+The JavaFX Maven Plugin provides a way to assemble distribution bundles for JavaFX applications (8+) from within Maven.
+
+This plugin is essentially a Maven wrapper for the packaging tool that comes with JavaFX, it's called [javapackager](https://docs.oracle.com/javase/9/tools/javapackager.htm).
+ 
+For easy configuration please use the old configurator:
+**[https://zenjava.net/javafx-maven-plugin/](https://zenjava.net/javafx-maven-plugin/)**
+
+
+
+Requirements
+============
+* Maven 3.5 (older versions might work too)
+* Java Developer Kit 8 with at least Update 40 (does **NOT** support JKD9 or later yet)
+
+
+
+OS-specific requirements
+========================
+* (Windows) EXE installers: Inno Setup
+* (Windows) MSI installers: WiX (at least version 3.7)
+* (Linux) DEB installers: dpkg-deb
+* (Linux) RPM installers: rpmbuild
+* (Mac) DMG installers: hdiutil
+* (Mac) PKG installers: pkgbuild
+
+
+
+Quickstart for JavaFX JAR
+=========================
+
+Add this to your pom.xml within to your build-plugin:
+
 ```xml
-  <dependency>
-    <groupId>org.jmock</groupId>
-    <artifactId>jmock-junit5</artifactId>
-    <version>2.12.0</version>
-    <scope>test</scope>
-  </dependency>
+<plugin>
+    <groupId>com.zenjava</groupId>
+    <artifactId>javafx-maven-plugin</artifactId>
+    <version>8.8.3</version>
+    <configuration>
+        <mainClass>your.package.with.Launcher</mainClass>
+    </configuration>
+</plugin>
 ```
-# Gradle
+
+To create your executable file with JavaFX-magic, call `mvn jfx:jar`. The jar-file will be placed at `target/jfx/app`.
+
+
+
+Quickstart for JavaFX native bundle
+===================================
+
+Add this to your pom.xml within to your build-plugin:
+
+```xml
+<plugin>
+    <groupId>com.zenjava</groupId>
+    <artifactId>javafx-maven-plugin</artifactId>
+    <version>8.8.3</version>
+    <configuration>
+        <vendor>YourCompany</vendor>
+        <mainClass>your.package.with.Launcher</mainClass>
+    </configuration>
+</plugin>
 ```
-testCompile(
-    "junit:junit5:5.3.1",
-    "org.jmock:jmock-junit5:2.12.0"
-)
+
+To create your executable file with JavaFX-magic and some installers (please see official oracle-documentation which applications are required for this), call `mvn jfx:native`. The native launchers or installers will be placed at `target/jfx/native`.
+
+
+Using `SNAPSHOT`-versions
+=========================
+When you report a bug and this got worked around, you might be able to have access to some -SNAPSHOT-version, please adjust your `pom.xml`:
+
+```xml
+<pluginRepositories>
+    <pluginRepository>
+        <id>oss-sonatype-snapshots</id>
+        <url>https://oss.sonatype.org/content/groups/public/</url>
+        <snapshots>
+            <enabled>true</enabled>
+        </snapshots>
+    </pluginRepository>
+</pluginRepositories>
 ```
-# Recent Changes
-## 2.10.0
-### JUnit 5 Support
-* Swap @Rule JUnit4Mockery for @RegisterExtension JMock5Mockery
-* Assign to a non-private JMock5Mockery or JUnit5 won't use it
-
-```java
-
-import org.jmock.Expectations;
-import org.jmock.junit5.JUnit5Mockery;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.RegisterExtension;
-
-public class JUnit5TestThatDoesSatisfyExpectations {
-    @RegisterExtension
-    JUnit5Mockery context = new JUnit5Mockery();
-    private Runnable runnable = context.mock(Runnable.class);
-    
-    @Test
-    public void doesSatisfyExpectations() {
-        context.checking(new Expectations() {{
-            oneOf (runnable).run();
-        }});
-        
-        runnable.run();
-    }
-}
-```
-### JUnit 4 moved to provided scope in org.jmock:jmock
-* This allows dependents to use other versions of junit or other test frameworks (e.g. junit 5)
-
-### Java7 Support will be dropped next release
-
-## 2.9.0
-* Dropped JDK 6 compliance.
-* Exposed the InvocationDispatcher so that ThreadingPolicies 
-
-## Upgrading to 2.8.X
-Are you seeing NPEs?
-
-We have had to make a breaking change to `with()`. Tests using `with(any(matcher))` for method signatures that require native types will throw `NullPointerException`.
-
-You should change
-
-    oneOf(mock).methodWithIntParams(with(any(Integer.class)));
-
-to the following
-
-    oneOf(mock).methodWithIntParams(with.intIs(anything());
-This is due to a compiler change in Java 1.7. The 2.6.0 release was compiled with Java 1.6 so it did not suffer this problem.
 
 
-# Advantages of jMock 2 over jMock 1
-* Uses real method calls, not strings, so you can refactor more easily and
-  autocomplete in the IDE.
-* Customisation by delegation, not by inheritance.
-* Many more plugin-points for customisation.
-* Independent of any testing framework: compatability with the testing
-  framework is a plugin-point.
-* Can mock concrete classes *without* calling their constructors (if
-  you really want to).
-* Uses Hamcrest matchers, so can use a large and ever-growing library
-  of matchers in expectations.
-* Expectations match in first-in, first-out order, so tests are easier to understand.
+Last Release Notes
+==================
 
-# Package Structure
+**Version 8.8.3 (09-feb-2017)**
 
-[jMock]() 2 is organised into published and internal packages.  We guarantee backwards compatability of types in published packages within the same major version of jMock.  There are no guarantees about backward compatability for types in internal packages.
-
-Types defined in published packages may themselves define public methods that accept or return types from internal packages or inherit methods from types in internal packages.  Such methods have no compatability guarantees and should not be considered as part of the published interface.
+Bugfixes:
+* fixed `<launcherArguments>` of secondary launchers not being set correctly ([reported at the javafx-gradle-plugin](https://github.com/FibreFoX/javafx-gradle-plugin/issues/55))
 
 
-## Published packages
+(Not yet) Release(d) Notes
+==========================
 
-### org.jmock
+upcoming Version 8.10.0 (???-???-2021)
 
-DSL-style API
+New:
+* added a way to have PKCS11 signing by setting `<skipKeypassWhileSigning>true</skipKeypassWhileSigning>` and `<skipKeyStoreChecking>true</skipKeyStoreChecking>`, makes it possible to have hardware tokens
+* added ability to prefix dependencies with their `groupId` by setting `<prefixWithGroupIdForClasspathDependencies>true</prefixWithGroupIdForClasspathDependencies>`, should work around the edge-case where dependencies have the same artifactId and would overwrite otherwise
 
-### org.jmock.api
+Enhancement:
+* ~~JDK 9 compatibility~~ (got broken with Jigsaw)
+* TravisCI: use newer build machines
 
-### org.jmock.lib
-
-Convenient classes that implement the APIs in the core, are used  by the DSL-style API, and can be used in user-defined APIs 
-
-### org.jmock.integration
-
-Classes integrating jMock with different testing APIs, such  as JUnit 3.x, JUnit 4.x and TestNG. 
-
-
-## Packages of example code
-
-### org.jmock.lib.nonstd
-
-Lib classes that rely on clever hacks or otherwise cannot be  guaranteed to always work in all JVMs.  There are no compatability guarantees with these classes.  Use at your own risk.
-
-
-## Internal packages
-
-### org.jmock.internal
-
-Internal implementation details 
-
-### org.jmock.test
-
-Tests for jMock itself
-
-
-## Plug-in Points
-
-### Matcher
-
-Controls the matching of invocations to expectations
-
-### Action
-
-Performs an action in response to an invocation
-
-### Imposteriser
-
-Wraps mock objects in an adapter of the correct type
-
-### Expectation
-
-Matches an invocation and fakes its behaviour
-
-### ExpectationErrorTranslator
-
-Translates expectation errors into error type used by a specific 
-testing framework.
-
-### MockObjectNamingScheme
-
-Creates names for mock objects based on the mocked type.
-
-# Contributing
-
-If you'd like to contribute, then do the following:
-
-1.  clone this repository (`git clone …`)
-2.  install Maven (`brew install mvn` on Mac OS, for example)
-3.  `$ mvn package` in order to generate a signed JAR. This will run all the tests. (`$ mvn test` appears not to suffice.)
-
+Documentation:
+* clarified that this plugin is a wrapper, thanks to @TurekBot

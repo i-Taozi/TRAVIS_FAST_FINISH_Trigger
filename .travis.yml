@@ -1,27 +1,68 @@
 language: java
 
-jdk:
-  - openjdk-ea
-  - openjdk11
-  - oraclejdk11
-  - openjdk10
-#  - oraclejdk10
-  - openjdk9
-  - oraclejdk8 #not supported
-
 matrix:
-  fast_finish: true
+  include:
+    ## https://docs.travis-ci.com/user/reference/trusty/
+    ## has newer Maven
+    - os: linux
+      sudo: false
+      dist: trusty
+      jdk: oraclejdk8
+      install: true
+      env: FAILURES_ALLOWED=false
+      addons:
+        apt:
+          packages:
+          ## RPM
+            - rpm
+          ## DEB
+            - fakeroot
+    ## OpenJDK should work too, but TravisCI has no up2date Ubuntu-Image, makes it impossible to install OpenJFX
+    - os: linux
+      sudo: false
+      dist: trusty
+      jdk: oraclejdk9
+      install: true
+      env: FAILURES_ALLOWED=false
+      addons:
+        apt:
+          packages:
+          ## RPM
+            - rpm
+          ## DEB
+            - fakeroot
+    ## has older Maven
+    - os: linux
+      sudo: false
+      dist: precise
+      jdk: oraclejdk8
+      env: FAILURES_ALLOWED=false
+      addons:
+        apt:
+          packages:
+          ## RPM
+            - rpm
+          ## DEB
+            - fakeroot
+    ## use different OSX versions
+    ## OS X 10.11
+    - os: osx
+      osx_image: xcode8
+      env: FAILURES_ALLOWED=false
+    ## OS X 10.12
+    - os: osx
+      osx_image: xcode8.3
+      env: FAILURES_ALLOWED=false
+    ## OS X 10.12
+    - os: osx
+      osx_image: xcode9.2
+      env: FAILURES_ALLOWED=false
   allow_failures:
-    - jdk: openjdk-ea
-    - jdk: oraclejdk8
+    - env: FAILURES_ALLOWED=true
 
-cache:
-  directories:
-  - $HOME/.m2 #for faster builds
+## maven-invoker-plugin is called after deploying javafx-maven-plugin into local repository, so change default-test-call to "install" (because its called at that maven-phase)
+script:
+  - mvn install -B
 
-env:
-# Travis has slow VMs?
-  global:
-  - blitzerThreads=1 blitzerActions=1 blitzerTimeout=1000
-  - secure: "XBIyEF5RxH/zKjh0gle5ce/FRe9pP5b46LXKNOfwlau5QYvn8WXC41Sb6yYC8VW3vI9S930BnVGZONiDXsSWuylLezdu2g88nwJ2CsTxHU0Yg2GAzKwaorBQqyK/6w2foRRXtz69NJccfdIdPuDZSEhJtTKWSmMMQ7U65KH+zzQ="
-  - secure: "SSlAKOg8QLEAkZX1ehy9c6FR5R6gMzLhc6u2Smq9tm8JsWVz4EtS6NnTQaosthrNEfLJwVVCfmOh2dzvYZfhtbKAUMdkox45tem4+LZfgkSaQAGjSvsC6geioa4Alo6AKyR8foc5Y7P34f9ujYSZHNyRG9F6E0Qq2zj/hzHhstU="
+notifications:
+  email: false
