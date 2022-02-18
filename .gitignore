@@ -1,12 +1,5 @@
-/target/
-.not-ci
-.headless
-.idea
-*.iml
+/.idea
+/*.iml
+/target
 *.swp
-/hs_err*.log
-/etc
-/.vagrant
-Vagrantfile
-/build
-/cluster-path
+/hs_err_pid*.log

@@ -1,22 +1,12 @@
 language: java
-
+jdk:
+  - oraclejdk8
+env:
+  - RUST_CHANNEL=stable
+  - RUST_CHANNEL=nightly
 matrix:
-  fast_finish: true
-    include:
-      - os: linux
-        jdk: oraclejdk8
-        env: RUST_CHANNEL=stable
-      - os: linux
-        jdk: oraclejdk9
-        env: RUST_CHANNEL=stable
-      - os: linux
-        jdk: oraclejdk8
-        env: RUST_CHANNEL=nightly
-      - os: osx
-        osx_image: xcode9
-        env: RUST_CHANNEL=stable
     allow_failures:
-      - jdk: oraclejdk9
+      - env: RUST_CHANNEL=nightly
 before_install:
   - "curl https://sh.rustup.rs -sSf > rustup && chmod +x rustup"
   - "./rustup -y"
@@ -26,8 +16,3 @@ install:
   - rustup toolchain install ${RUST_CHANNEL}
   - rustup override set ${RUST_CHANNEL}
   - rustc --version
-  - mvn --batch-mode package -DskipTests
-script: mvn --batch-mode package
-cache:
-    directories:
-      - $HOME/.m2

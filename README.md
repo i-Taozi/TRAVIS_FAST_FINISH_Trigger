@@ -1,63 +1,70 @@
-# Rust NetBeans Plugin
+# Java/Rust Example
 
-A NetBeans plugin for [Rust](https://www.rust-lang.org).
+An example project showing how to call into Rust code from Java.
 
-| Linux / OSX | Windows |
-| ----------- | ------- |
-| [![nix Build Status](https://travis-ci.org/drrb/rust-netbeans.svg?branch=master)](https://travis-ci.org/drrb/rust-netbeans) | [![Windows Build status](https://ci.appveyor.com/api/projects/status/ae0ci8qvmh5pawi1/branch/master?svg=true)](https://ci.appveyor.com/project/drrb/rust-netbeans/branch/master) |
+| OSX | Linux | Windows |
+| --- | ----- | ------- |
+| ![OSX Build Status](https://img.shields.io/badge/build-passing%20on%20my%20laptop-brightgreen.svg) | [![Linux Build Status](https://travis-ci.org/drrb/java-rust-example.svg?branch=master)](https://travis-ci.org/drrb/java-rust-example) | [![Windows Build status](https://ci.appveyor.com/api/projects/status/4yygb3925k7p87de/branch/master?svg=true)](https://ci.appveyor.com/project/drrb/java-rust-example/branch/master) |
 
 ## Requirements
 
-* NetBeans 8.2.x
-* Java 8+
-* Rust
-* Cargo
-* Rustup
+- Java 7+
+- Rust (tested with 1.0, nightly)
 
-## Features
+## Contents
 
-So far, it includes
+So far, the project contains
+- Rust code and Java code
+- A Java interface to the Rust code, using [JNA](https://github.com/twall/jna)
+- A script to build the Rust code into a library and put it on the classpath where JNA can find it
+- Examples of passing strings, structs, and callback functions between Java and Rust
 
-* Cargo project support:
-    * project view
-    * clean/build/run/test from UI
-* Highlighting:
-    * syntax highlighting
-* Editing:
-    * brace matching
-    * comment toggling
-* Navigation:
-    * Go To Type
-* Formatting:
-    * auto-indentation
-    * basic auto-formatting
-* Testing UI:
-    * run all tests
-    * run module's tests
-* Coming Soon:
-    * error/warning highlighting
-    * code completion
-    * code folding
-    * basic file overview
-    * basic occurrence matching
-    * basic variable renaming
+## Getting Started
 
-## Installing
+The best place to start looking at the examples is in the test code
+([GreetingsTest.java](src/test/java/com/github/drrb/javarust/GreetingsTest.java)).
+The test contains lots of executable examples of calling into Rust code from
+Java.  From the test, you can navigate to the [Java code](src/main/java/com/github/drrb/javarust/Greetings.java)
+and the [Rust code](src/main/rust/com/github/drrb/javarust/lib/greetings.rs). The
+implementation is heavily commented to explain it.
 
-First, clone and build the plugin.
+So far, it contains examples of the following (click the links to see!):
+- *[Arguments](src/test/java/com/github/drrb/javarust/GreetingsTest.java#L45)*: passing simple arguments from Java to Rust ([Java side](src/main/java/com/github/drrb/javarust/Greetings.java#L44) / [Rust side](src/main/rust/com/github/drrb/javarust/lib/greetings.rs#L81))
+- *[Return values](src/test/java/com/github/drrb/javarust/GreetingsTest.java#L50)*: returning simple values from Rust to Java ([Java side](src/main/java/com/github/drrb/javarust/Greetings.java#L49) / [Rust side](src/main/rust/com/github/drrb/javarust/lib/greetings.rs#L91))
+- *[Struct arguments](src/test/java/com/github/drrb/javarust/GreetingsTest.java#L56)*: passing structs to Rust from Java ([Java side](src/main/java/com/github/drrb/javarust/Greetings.java#L54) / [Rust side](src/main/rust/com/github/drrb/javarust/lib/greetings.rs#L100))
+- *[Returning structs (2 examples)](src/test/java/com/github/drrb/javarust/GreetingsTest.java#L65)*: returning structs from Rust by value and by reference ([Java side](src/main/java/com/github/drrb/javarust/Greetings.java#L71) / [Rust side](src/main/rust/com/github/drrb/javarust/lib/greetings.rs#L109))
+- *[Callbacks (3 examples)](src/test/java/com/github/drrb/javarust/GreetingsTest.java#L80)*: passing callbacks to Rust that get called from the Rust code ([Java side](src/main/java/com/github/drrb/javarust/Greetings.java#L84) / [Rust side](src/main/rust/com/github/drrb/javarust/lib/greetings.rs#L129))
+- *[Freeing memory](src/test/java/com/github/drrb/javarust/GreetingsTest.java#L67)*: freeing memory allocated in Rust ([Java side](src/main/java/com/github/drrb/javarust/Greetings.java#L114) / [Rust side](src/main/rust/com/github/drrb/javarust/lib/greetings.rs#L171))
 
-```console
-git clone https://github.com/drrb/rust-netbeans.git
-mvn package
+## Building and Running the Tests
+
+To build the project, and run the tests, use Maven. This will build a jar
+containing the Rust code and the Java code. This assumes you have Rust
+installed, and on the path.
+
+```
+$ mvn package
 ```
 
-You can then install the plugin from NetBeans (the plugin will have been packaged at `target/rust-netbeans-1.0.0-SNAPSHOT.nbm`).
+You can then run the jar that is produced to see the integration work.
+
+```
+$ java -jar target/greeter.jar John
+Hello from Rust, John
+```
+
+## Platform Support
+
+This project is tested on OSX, Ubuntu, and Windows. It should also work on any 32 bit or 64 bit Gnu/Linux system.
+
+## Limitations
+
+Some of the examples leak memory. Any memory that is allocated in Rust needs to be freed manually because it's not managed by JNA. Some examples pass objects back into Rust to be dropped for this reason, but we don't clean up everything properly (strings, for example). This is almost certainly not a limitation of Rust, but a limitation of my current understanding of Rust.
 
 ## License
 
-Rust NetBeans Plugin
-
-Copyright (C) 2017 drrb
+Java/Rust Example
+Copyright (C) 2015 drrb
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
