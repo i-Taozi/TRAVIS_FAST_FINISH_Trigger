@@ -1,0 +1,35 @@
+pipeline:
+    - Create/Reuse output windows
+    - Caching AST?
+bugs:
+    - Brace completion doesn't work at end of document
+features:
+    editor:
+        - Cargo.toml highlighting
+        - Code completion
+        - Documentation in code completion
+        - MD highlighting for doc comments
+        - Go to declaration
+        - Instant rename
+        - Use rustc for formatting
+    run:
+        - Popup on success/failure
+        - Run file
+        - Debugger (http://netbeans.dzone.com/how-reuse-netbeans-debugger)
+        - Test UI
+    project:
+        - 'New Rust project'
+        - Icons (ask for help)
+        - Icon badging (e.g. play arrow for executable source)
+        - Project customizer (https://platform.netbeans.org/tutorials/nbm-projecttype.html#projectcustomizer)
+    cross_platform:
+        - Support Linux (should work, but unable to load Rust shared libraries)
+        - Support building plugin on Windows
+        - Support Cargo on Windows
+
+development:
+    testing:
+        - Unit tests on Travis (requires fixing Linux library loading)
+        - Functional tests on Travis: http://about.travis-ci.org/docs/user/gui-and-headless-browsers
+    release:
+        - How do we distribute a NetBeans plugin?
