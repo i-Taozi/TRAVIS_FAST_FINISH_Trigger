@@ -1,5 +1,8 @@
-/.idea
-/*.iml
-/target
-*.swp
-/hs_err_pid*.log
+target
+logs
+
+#intellij files
+.idea
+*.iml
+.DS_Store
+docs/.DS_Store

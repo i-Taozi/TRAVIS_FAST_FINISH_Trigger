@@ -1,19 +1,28 @@
-language: java
+language:
+    java
+
+sudo:
+    false
+
+dist: trusty
+
 jdk:
-  - oraclejdk8
-env:
-  - RUST_CHANNEL=stable
-  - RUST_CHANNEL=nightly
+    - oraclejdk8
+    - oraclejdk9
+    - openjdk7
+
 matrix:
-  fast_finish: true
     allow_failures:
-      - env: RUST_CHANNEL=nightly
-before_install:
-  - "curl https://sh.rustup.rs -sSf > rustup && chmod +x rustup"
-  - "./rustup -y"
-  - "export PATH=$PATH:~/.cargo/bin"
-  - rustc --version
-install:
-  - rustup toolchain install ${RUST_CHANNEL}
-  - rustup override set ${RUST_CHANNEL}
-  - rustc --version
+        - jdk: oraclejdk9
+
+before_script:
+  - git submodule update --remote --recursive
+
+script:
+  - cd sample-code-java
+  - mvn install -DsdkVersion=2.0.4-SNAPSHOT -DskipTests=true -Dmaven.javadoc.skip=true -B -V
+  - mvn test -DsdkVersion=2.0.4-SNAPSHOT -B
+
+after_script:
+    print_surefire_reports.sh
+ 
