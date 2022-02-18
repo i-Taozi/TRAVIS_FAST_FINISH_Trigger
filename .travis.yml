@@ -1,69 +1,54 @@
 language: java
 
+jdk:
+  - oraclejdk11
+  - oraclejdk9
+  - oraclejdk8
+  - openjdk12
+  - openjdk11
+  - openjdk10
+  - openjdk9
+  - openjdk8
+
 matrix:
-  fast_finish: true
   include:
-    ## https://docs.travis-ci.com/user/reference/trusty/
-    ## has newer Maven
-    - os: linux
-      sudo: false
-      dist: trusty
-      jdk: oraclejdk8
-      install: true
-      env: FAILURES_ALLOWED=false
-      addons:
-        apt:
-          packages:
-          ## RPM
-            - rpm
-          ## DEB
-            - fakeroot
-    ## OpenJDK should work too, but TravisCI has no up2date Ubuntu-Image, makes it impossible to install OpenJFX
-    - os: linux
-      sudo: false
-      dist: trusty
-      jdk: oraclejdk9
-      install: true
-      env: FAILURES_ALLOWED=false
-      addons:
-        apt:
-          packages:
-          ## RPM
-            - rpm
-          ## DEB
-            - fakeroot
-    ## has older Maven
-    - os: linux
-      sudo: false
-      dist: precise
-      jdk: oraclejdk8
-      env: FAILURES_ALLOWED=false
-      addons:
-        apt:
-          packages:
-          ## RPM
-            - rpm
-          ## DEB
-            - fakeroot
-    ## use different OSX versions
-    ## OS X 10.11
-    - os: osx
-      osx_image: xcode8
-      env: FAILURES_ALLOWED=false
-    ## OS X 10.12
-    - os: osx
-      osx_image: xcode8.3
-      env: FAILURES_ALLOWED=false
-    ## OS X 10.12
-    - os: osx
-      osx_image: xcode9.2
-      env: FAILURES_ALLOWED=false
+    - jdk: openjdk7
+      sudo: required
+      before_install: # Work around missing crypto in openjdk7
+        - wget http://security.ubuntu.com/ubuntu/pool/main/g/gcc-5/gcc-5-base_5.4.0-6ubuntu1~16.04.10_amd64.deb
+        - wget http://security.ubuntu.com/ubuntu/pool/main/g/gcc-5/libgomp1_5.4.0-6ubuntu1~16.04.10_amd64.deb
+        - wget http://archive.ubuntu.com/ubuntu/pool/main/n/ncurses/libtinfo5_6.0+20160213-1ubuntu1_amd64.deb
+        - wget http://archive.ubuntu.com/ubuntu/pool/main/g/gettext/gettext_0.19.7-2ubuntu3.1_amd64.deb
+        - sudo dpkg -i gcc-5-base_5.4.0-6ubuntu1~16.04.10_amd64.deb
+        - sudo dpkg -i libgomp1_5.4.0-6ubuntu1~16.04.10_amd64.deb
+        - sudo dpkg -i libtinfo5_6.0+20160213-1ubuntu1_amd64.deb
+        - sudo dpkg -i gettext_0.19.7-2ubuntu3.1_amd64.deb
+        - export JAVA7_HOME=$(jdk_switcher home openjdk7)
+        - sudo wget "https://bouncycastle.org/download/bcprov-ext-jdk15on-158.jar" -O "${JAVA_HOME}/jre/lib/ext/bcprov-ext-jdk15on-158.jar"
+        - sudo perl -pi.bak -e 's/^(security\.provider\.)([0-9]+)/$1.($2+1)/ge' /etc/java-7-openjdk/security/java.security
+        - echo "security.provider.1=org.bouncycastle.jce.provider.BouncyCastleProvider" | sudo tee -a /etc/java-7-openjdk/security/java.security
+      install:
+        - export TARGET_JAVA_HOME=$JAVA_HOME
+        - jdk_switcher use oraclejdk8
+        - ./gradlew assemble
   allow_failures:
-    - env: FAILURES_ALLOWED=true
+    - jdk: openjdk12
 
-## maven-invoker-plugin is called after deploying javafx-maven-plugin into local repository, so change default-test-call to "install" (because its called at that maven-phase)
-script:
-  - mvn install -B
+before_install:
+  - wget http://security.ubuntu.com/ubuntu/pool/main/g/gcc-5/gcc-5-base_5.4.0-6ubuntu1~16.04.10_amd64.deb
+  - wget http://security.ubuntu.com/ubuntu/pool/main/g/gcc-5/libgomp1_5.4.0-6ubuntu1~16.04.10_amd64.deb
+  - wget http://archive.ubuntu.com/ubuntu/pool/main/n/ncurses/libtinfo5_6.0+20160213-1ubuntu1_amd64.deb
+  - wget http://archive.ubuntu.com/ubuntu/pool/main/g/gettext/gettext_0.19.7-2ubuntu3.1_amd64.deb
+  - sudo dpkg -i gcc-5-base_5.4.0-6ubuntu1~16.04.10_amd64.deb
+  - sudo dpkg -i libgomp1_5.4.0-6ubuntu1~16.04.10_amd64.deb
+  - sudo dpkg -i libtinfo5_6.0+20160213-1ubuntu1_amd64.deb
+  - sudo dpkg -i gettext_0.19.7-2ubuntu3.1_amd64.deb
+  - export JAVA7_HOME=$(jdk_switcher home openjdk7)
 
-notifications:
-  email: false
+before_cache:
+  - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
+  - rm -fr $HOME/.gradle/caches/*/plugin-resolution/
+cache:
+  directories:
+    - $HOME/.gradle/caches/
+    - $HOME/.gradle/wrapper/

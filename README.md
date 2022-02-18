@@ -1,115 +1,140 @@
-[![Maven Central](https://img.shields.io/maven-central/v/com.zenjava/javafx-maven-plugin.svg)](https://maven-badges.herokuapp.com/maven-central/com.zenjava/javafx-maven-plugin)
+# I2P-Bote
 
+[![Build Status](https://travis-ci.org/i2p/i2p.i2p-bote.svg?branch=master)](https://travis-ci.org/i2p/i2p.i2p-bote)
 
+I2P-Bote is a plugin for I2P that allows users to send and receive emails while preserving privacy. It does not need a mail server because emails are stored in a distributed hash table. They are automatically encrypted and digitally signed, which ensures no one but the intended recipient can read the email, and third parties cannot forge them.
 
-JavaFX Maven Plugin
-===================
+## Features
 
-The JavaFX Maven Plugin provides a way to assemble distribution bundles for JavaFX applications (8+) from within Maven.
+- Themeable webmail interface
+- User interface translated in many languages
+- One-click creation of email accounts (called email identities)
+- Emails can be sent under a sender identity, or anonymously
+- ElGamal, Elliptic Curve, and NTRU Encryption
+- Encryption and signing is transparent, without the need to know about PGP
+- Delivery confirmation
+- Basic support for short recipient names
+- IMAP / SMTP
 
-This plugin is essentially a Maven wrapper for the packaging tool that comes with JavaFX, it's called [javapackager](https://docs.oracle.com/javase/9/tools/javapackager.htm).
- 
-For easy configuration please use the old configurator:
-**[https://zenjava.net/javafx-maven-plugin/](https://zenjava.net/javafx-maven-plugin/)**
+### Planned Features
 
+- Custom folders
+- Sending and receiving via relays, similar to Mixmaster
+- Lots of small improvements
 
+## Build process
 
-Requirements
-============
-* Maven 3.5 (older versions might work too)
-* Java Developer Kit 8 with at least Update 40 (does **NOT** support JKD9 or later yet)
+### Dependencies:
 
+- Java SDK (preferably Oracle/Sun or OpenJDK) 1.7.0 or higher
+- Apache Ant 1.8.0 or higher
+- Gradle 2.14.1
 
+### Gradle
 
-OS-specific requirements
-========================
-* (Windows) EXE installers: Inno Setup
-* (Windows) MSI installers: WiX (at least version 3.7)
-* (Linux) DEB installers: dpkg-deb
-* (Linux) RPM installers: rpmbuild
-* (Mac) DMG installers: hdiutil
-* (Mac) PKG installers: pkgbuild
+The build system is based on Gradle. There are several methods for setting Gradle up:
 
+* It can be downloaded from [the Gradle website](http://www.gradle.org/downloads).
 
+* Most distributions will have Gradle packages. Be careful to check the provided version; Debian and Ubuntu have old versions in their main repositories. There is a [PPA](https://launchpad.net/~cwchien/+archive/gradle) for Ubuntu with the latest version of Gradle.
 
-Quickstart for JavaFX JAR
-=========================
+* A Gradle wrapper is provided in the codebase. It takes all the same commands as the regular `gradle` command. The first time that any command is run, it will automatically download, cache and use the correct version of Gradle. This is the simplest way to get started with the codebase. To use it, replace `gradle` with `./gradlew` (or `./gradlew.bat` on Windows) in the commands below.
 
-Add this to your pom.xml within to your build-plugin:
+Gradle will pull dependencies over the clearnet by default. To use Tor, create a `gradle.properties` file in `i2p.android.base` containing:
 
-```xml
-<plugin>
-    <groupId>com.zenjava</groupId>
-    <artifactId>javafx-maven-plugin</artifactId>
-    <version>8.8.3</version>
-    <configuration>
-        <mainClass>your.package.with.Launcher</mainClass>
-    </configuration>
-</plugin>
+    ```
+    systemProp.socksProxyHost=localhost
+    systemProp.socksProxyPort=9150
+    ```
+
+### Building the I2P plugin
+
+```
+gradle :webapp:plugin
 ```
 
-To create your executable file with JavaFX-magic, call `mvn jfx:jar`. The jar-file will be placed at `target/jfx/app`.
+The plugin will be placed in `i2p.i2p-bote/webapp/build/plugin`.
 
+### Building the standalone WAR
 
-
-Quickstart for JavaFX native bundle
-===================================
-
-Add this to your pom.xml within to your build-plugin:
-
-```xml
-<plugin>
-    <groupId>com.zenjava</groupId>
-    <artifactId>javafx-maven-plugin</artifactId>
-    <version>8.8.3</version>
-    <configuration>
-        <vendor>YourCompany</vendor>
-        <mainClass>your.package.with.Launcher</mainClass>
-    </configuration>
-</plugin>
+```
+gradle :webapp:war
 ```
 
-To create your executable file with JavaFX-magic and some installers (please see official oracle-documentation which applications are required for this), call `mvn jfx:native`. The native launchers or installers will be placed at `target/jfx/native`.
+The WAR will be placed in `i2p.i2p-bote/webapp/build/libs`.
 
+### Running the standalone WAR
 
-Using `SNAPSHOT`-versions
-=========================
-When you report a bug and this got worked around, you might be able to have access to some -SNAPSHOT-version, please adjust your `pom.xml`:
+Ensure you have an I2P router running locally with an I2CP server port open (on port 7654). Then run:
 
-```xml
-<pluginRepositories>
-    <pluginRepository>
-        <id>oss-sonatype-snapshots</id>
-        <url>https://oss.sonatype.org/content/groups/public/</url>
-        <snapshots>
-            <enabled>true</enabled>
-        </snapshots>
-    </pluginRepository>
-</pluginRepositories>
+```
+gradle :webapp:tomcatRunWar
 ```
 
+This will build and run the WAR. (Jetty currently does not work.)
 
-Last Release Notes
-==================
+The data directory will be placed in `i2p.i2p-bote/webapp/i2pbote`; logs will be in `i2p.i2p-bote/webapp/logs`.
 
-**Version 8.8.3 (09-feb-2017)**
+## Android build process
 
-Bugfixes:
-* fixed `<launcherArguments>` of secondary launchers not being set correctly ([reported at the javafx-gradle-plugin](https://github.com/FibreFoX/javafx-gradle-plugin/issues/55))
+### Additional dependencies:
 
+- [I2P source](https://github.com/i2p/i2p.i2p)
+- Android SDK 25
+- Android Build Tools 25.0.2
+- Android Support Repository
 
-(Not yet) Release(d) Notes
-==========================
+### Preparation
 
-upcoming Version 8.10.0 (???-???-2021)
+1. Download the Android SDK. The simplest method is to download Android Studio.
 
-New:
-* added a way to have PKCS11 signing by setting `<skipKeypassWhileSigning>true</skipKeypassWhileSigning>` and `<skipKeyStoreChecking>true</skipKeyStoreChecking>`, makes it possible to have hardware tokens
-* added ability to prefix dependencies with their `groupId` by setting `<prefixWithGroupIdForClasspathDependencies>true</prefixWithGroupIdForClasspathDependencies>`, should work around the edge-case where dependencies have the same artifactId and would overwrite otherwise
+2. Create a `local.properties` file in `i2p.i2p-bote/android` containing:
 
-Enhancement:
-* ~~JDK 9 compatibility~~ (got broken with Jigsaw)
-* TravisCI: use newer build machines
+    ```
+    i2psrc=/path/to/i2p.i2p
+    ```
 
-Documentation:
-* clarified that this plugin is a wrapper, thanks to @TurekBot
+3. If you want to use a local copy of the I2P Android client library, install it in your local Maven repository with:
+
+    ```
+    cd path/to/i2p.android.base
+    ./gradlew client:installArchives
+    ```
+
+### Building from the command line
+
+1. Create a `local.properties` file in `i2p.i2p-bote` containing:
+
+    ```
+    sdk.dir=/path/to/android-studio/sdk
+    ```
+
+2. `gradle :android:assembleDebug`
+
+3. The APK will be placed in `i2p.i2p-bote/android/build/apk`.
+
+### Building with Android Studio
+
+1. Import `i2p.i2p-bote` into Android Studio. (This creates the `local.properties` file automatically).
+
+2. Build and run the app (`Shift+F10`).
+
+### Signing release builds
+
+1. Create a `signing.properties` file in `i2p.i2p-bote` containing:
+
+    ```
+    STORE_FILE=/path/to/android.keystore
+    STORE_PASSWORD=store.password
+    KEY_ALIAS=key.alias
+    KEY_PASSWORD=key.password
+    ```
+
+2. `gradle assembleRelease`
+
+## More information
+
+The links below only work within I2P, i.e., make sure you are running I2P and your browser is using the proxy at localhost:4444.
+
+- http://i2pbote.i2p I2P-Bote homepage
+- http://forum.i2p/viewforum.php?f=35 I2P-Bote forum
