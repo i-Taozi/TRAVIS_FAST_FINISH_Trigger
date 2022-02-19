@@ -1,52 +1,48 @@
-language: java
 dist: trusty
+language: java
 
-services: mysql
+cache:
+  directories:
+  - $HOME/.m2
+  - $HOME/.mvn/
 
-before_script:
-# Import Database
-  - mysql -e 'CREATE DATABASE test;'
-  - mysql test < voj.sql
+# jdk6 requires workarounds https://github.com/travis-ci/travis-ci/issues/9713
+addons:
+  apt:
+    packages:
+      - openjdk-6-jdk
 
 before_install:
-# Download JDK installer
-  - wget https://github.com/sormuras/bach/raw/master/install-jdk.sh
-# Fix path error on JNI headers
-  - sudo ln -nsf $JAVA_HOME/include/linux/jni_md.h $JAVA_HOME/include/jni_md.h
-  - sudo ln -nsf $JAVA_HOME/include/linux/jawt_md.h $JAVA_HOME/include/jawt_md.h
-# Setup test environment for Linux
-  - cp judger/src/test/resources/voj-test-linux.properties judger/src/test/resources/voj-test.properties
-# Find Maven Installation Path for root user
-  - sudo find / -name mvn
-  - export MVN_EXEC=`sudo find / -name mvn`
-# Setup Maven for Oracle JDK 9
-  - export MAVEN_SKIP_RC=true
-
-matrix:
-  fast_finish: true
-  include:
-    - env: JDK='Oracle JDK 8'
-      jdk: oraclejdk8
-
-    - env: JDK='Open JDK 8'
-      jdk: openjdk8
-
-    - env: JDK='Oracle JDK 11'
-      install: . ./install-jdk.sh -F 11 -L BCL
-
-    - env: JDK='Open JDK 11'
-      jdk: openjdk11
-
-  allow_failures:
-    - env: JDK='Oracle JDK 11'
-
-script: 
-  - echo PATH = ${PATH}
-  - echo JAVA_HOME = ${JAVA_HOME}
-  - java -version
-  - mvn test -f web/pom.xml
-  - sudo $MVN_EXEC test -f judger/pom.xml
+  - > # install mvn 3.2.5 for use with java6
+      which $HOME/.mvn/3.2.5/bin/mvn || mkdir -p $HOME/.mvn/3.2.5 &&
+      curl https://apache.osuosl.org/maven/maven-3/3.2.5/binaries/apache-maven-3.2.5-bin.tar.gz |
+      tar xz -C $HOME/.mvn/3.2.5 --strip-components=1
+  - if [ "$TRAVIS_JDK_VERSION" == "openjdk6" ]; then jdk_switcher use openjdk6; fi
+  - mvn -v
 
 after_script:
-  - mysql -e 'DROP DATABASE test;'
+  - > # print more detailed info about test results
+      cat target/surefire-reports/TEST-ysoserial.test.payloads.PayloadsTest.xml |
+      grep testcase -A1 | grep -B1 -E 'failure|error|skipped' | grep -v -- --
+
+matrix:
+  allow_failures:
+    - jdk: oraclejdk11
+    - jdk: openjdk6
+    - jdk: openjdk7
+    - jdk: openjdk9
+    - jdk: openjdk10
+    - jdk: openjdk11
+  include:
+    #- jdk: oraclejdk7 #https://github.com/travis-ci/travis-ci/issues/7884
+    - jdk: oraclejdk8
+    - jdk: oraclejdk11
+    - jdk: openjdk6
+      env: PATH=$HOME/.mvn/3.2.5/bin:$PATH
+    - jdk: openjdk7
+    - jdk: openjdk8
+    - jdk: openjdk9
+    - jdk: openjdk10
+    - jdk: openjdk11
+
 

