@@ -1,69 +1,45 @@
 language: java
 
-matrix:
-  fast_finish: true
-  include:
-    ## https://docs.travis-ci.com/user/reference/trusty/
-    ## has newer Maven
-    - os: linux
-      sudo: false
-      dist: trusty
-      jdk: oraclejdk8
-      install: true
-      env: FAILURES_ALLOWED=false
-      addons:
-        apt:
-          packages:
-          ## RPM
-            - rpm
-          ## DEB
-            - fakeroot
-    ## OpenJDK should work too, but TravisCI has no up2date Ubuntu-Image, makes it impossible to install OpenJFX
-    - os: linux
-      sudo: false
-      dist: trusty
-      jdk: oraclejdk9
-      install: true
-      env: FAILURES_ALLOWED=false
-      addons:
-        apt:
-          packages:
-          ## RPM
-            - rpm
-          ## DEB
-            - fakeroot
-    ## has older Maven
-    - os: linux
-      sudo: false
-      dist: precise
-      jdk: oraclejdk8
-      env: FAILURES_ALLOWED=false
-      addons:
-        apt:
-          packages:
-          ## RPM
-            - rpm
-          ## DEB
-            - fakeroot
-    ## use different OSX versions
-    ## OS X 10.11
-    - os: osx
-      osx_image: xcode8
-      env: FAILURES_ALLOWED=false
-    ## OS X 10.12
-    - os: osx
-      osx_image: xcode8.3
-      env: FAILURES_ALLOWED=false
-    ## OS X 10.12
-    - os: osx
-      osx_image: xcode9.2
-      env: FAILURES_ALLOWED=false
-  allow_failures:
-    - env: FAILURES_ALLOWED=true
+sudo: false
 
-## maven-invoker-plugin is called after deploying javafx-maven-plugin into local repository, so change default-test-call to "install" (because its called at that maven-phase)
-script:
-  - mvn install -B
+cache:
+  directories:
+  - $HOME/.m2
+
+services:
+  - docker
+
+jdk:
+- openjdk8
+- openjdk10
+- openjdk11
+
+matrix:
+  allow_failures:
+  - jdk: openjdk10
+  - jdk: openjdk11
+
+addons:
+  sonarcloud:
+    organization: "atomix"
+    token:
+      secure: "lGc/yOj/HBugU0jPSx/mu6TnJHkDRJ4PVVP3rDUk9gzvEpa6P/txt/focXtgQ4L5NToEwA85cFQIRLuaxzySFy7+79TxCuhqO9/wj/IjI8i2cQivZCximLiVEl4QEYBKjVIUPcV33PdjE/B2t5YuMB9gBwjBQxAyfT/jum3ny2w="
 
 notifications:
   email: false
+
+branches:
+  only:
+    - master
+    - 3.1
+
+install:
+  - mvn clean install --batch-mode -V -DskipTests=true -Dmaven.test.skip=true -Dmaven.javadoc.skip=true -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn
+
+script:
+  - mvn verify --batch-mode -Droot.logging.level=INFO -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn
+
+after_success:
+  - mvn coveralls:report sonar:sonar --batch-mode -Droot.logging.level=INFO -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn
+  - bin/ci-push-javadoc.sh
+  - bin/ci-deploy-snapshot.sh
