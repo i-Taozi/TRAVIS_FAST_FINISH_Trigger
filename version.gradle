@@ -1,0 +1,3 @@
+gradle.ext {
+    javafxGradlePluginVersion = '8.9.0-SNAPSHOT'
+}
