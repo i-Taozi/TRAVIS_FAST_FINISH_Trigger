@@ -1,17 +1,17 @@
-# java
-*.class
-
-# mvn
-target/
-
-# eclipse
+target
+out
+lib_managed
+.deps
+.idea
+.gradle
+build
+*.iml
+*.ipr
+*.iws
+.settings
 .classpath
 .project
-.settings/
-
-# idea
-.idea/
-*.iml
-
-# tests
-pwntest
+.DS_Store
+MANIFEST.MF
+*/bin/**
+*~

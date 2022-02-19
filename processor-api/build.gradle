@@ -1,0 +1,12 @@
+pomProjectName = "Derive4J - Annotation Processor API"
+
+archivesBaseName = "${project.projectName}-${project.name}"
+
+dependencies {
+  compile project(":annotation")
+  compile dependencyJavaPoet
+  testCompile dependencyJunit
+  annotationProcessor dependencyPreviousDerive4J
+}
+
+configureUpload(lgplLicenseName)
