@@ -1,46 +1,21 @@
 language: java
 
-sudo: false
-
-cache:
-  directories:
-  - $HOME/.m2
-
-services:
-  - docker
-
 jdk:
-- openjdk8
-- openjdk10
-- openjdk11
+  - openjdk8
+  - openjdk11
+  - openjdk-ea
 
 matrix:
-  fast_finish: true
   allow_failures:
-  - jdk: openjdk10
-  - jdk: openjdk11
+    - jdk: openjdk-ea
 
-addons:
-  sonarcloud:
-    organization: "atomix"
-    token:
-      secure: "lGc/yOj/HBugU0jPSx/mu6TnJHkDRJ4PVVP3rDUk9gzvEpa6P/txt/focXtgQ4L5NToEwA85cFQIRLuaxzySFy7+79TxCuhqO9/wj/IjI8i2cQivZCximLiVEl4QEYBKjVIUPcV33PdjE/B2t5YuMB9gBwjBQxAyfT/jum3ny2w="
+after_success:
+  - ci/deploy-snapshot.sh
 
 notifications:
   email: false
 
-branches:
-  only:
-    - master
-    - 3.1
-
-install:
-  - mvn clean install --batch-mode -V -DskipTests=true -Dmaven.test.skip=true -Dmaven.javadoc.skip=true -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn
-
-script:
-  - mvn verify --batch-mode -Droot.logging.level=INFO -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn
-
-after_success:
-  - mvn coveralls:report sonar:sonar --batch-mode -Droot.logging.level=INFO -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn
-  - bin/ci-push-javadoc.sh
-  - bin/ci-deploy-snapshot.sh
+sudo: false
+cache:
+  directories:
+    - $HOME/.m2
