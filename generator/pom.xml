@@ -6,10 +6,9 @@
         <artifactId>rxgwt-parent</artifactId>
         <version>HEAD-SNAPSHOT</version>
     </parent>
-    <artifactId>rxgwt</artifactId>
-    <packaging>gwt-lib</packaging>
-    <name>RxGWT :: Core</name>
-    <description>RxGWT core utilities.</description>
+    <artifactId>rxgwt-generator</artifactId>
+    <packaging>jar</packaging>
+    <name>RxGWT :: Generator</name>
 
     <dependencies>
         <dependency>
@@ -19,45 +18,59 @@
         <dependency>
             <groupId>com.google.gwt</groupId>
             <artifactId>gwt-user</artifactId>
-            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>com.google.gwt</groupId>
             <artifactId>gwt-elemental</artifactId>
-            <optional>true</optional>
         </dependency>
         <dependency>
-            <groupId>com.google.elemental2</groupId>
-            <artifactId>elemental2-dom</artifactId>
-            <optional>true</optional>
+            <groupId>org.reflections</groupId>
+            <artifactId>reflections</artifactId>
+            <version>0.9.10</version>
         </dependency>
         <dependency>
-            <groupId>org.jboss.gwt.elemento</groupId>
-            <artifactId>elemento-core</artifactId>
-            <optional>true</optional>
+            <groupId>com.squareup</groupId>
+            <artifactId>javapoet</artifactId>
+            <version>1.8.0</version>
+        </dependency>
+        <dependency>
+            <groupId>dom4j</groupId>
+            <artifactId>dom4j</artifactId>
+            <version>1.6.1</version>
         </dependency>
         <dependency>
             <groupId>com.google.code.findbugs</groupId>
             <artifactId>jsr305</artifactId>
-            <optional>true</optional>
         </dependency>
     </dependencies>
 
     <build>
         <plugins>
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>1.4.0</version>
                 <configuration>
-                    <proc>none</proc>
+                    <workingDirectory>${basedir}/..</workingDirectory>
                 </configuration>
+                <executions>
+                    <execution>
+                        <id>generate-handlers</id>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>java</goal>
+                        </goals>
+                        <configuration>
+                            <mainClass>com.intendia.rxgwt2.RxGenerator</mainClass>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
             <plugin>
-                <groupId>net.ltgt.gwt.maven</groupId>
-                <artifactId>gwt-maven-plugin</artifactId>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-deploy-plugin</artifactId>
                 <configuration>
-                    <moduleName>com.intendia.rxgwt2.RxGwt</moduleName>
-                    <skipModule>true</skipModule>
+                    <skip>true</skip>
                 </configuration>
             </plugin>
         </plugins>
