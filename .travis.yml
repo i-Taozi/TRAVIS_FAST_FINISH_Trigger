@@ -1,6 +1,7 @@
 language: java
 
 matrix:
+  fast_finish: true
   include:
     ## kept in sync with javafx-maven-plugin for easier comparision
     ## https://docs.travis-ci.com/user/reference/trusty/
