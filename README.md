@@ -1,65 +1,310 @@
-GWT-OpenLayers 3+
-==================
+<!--
+	Licensed to the Apache Software Foundation (ASF) under one
+	or more contributor license agreements.  See the NOTICE file
+	distributed with this work for additional information
+	regarding copyright ownership.  The ASF licenses this file
+	to you under the Apache License, Version 2.0 (the
+	"License"); you may not use this file except in compliance
+	with the License.  You may obtain a copy of the License at
+	
+	https://www.apache.org/licenses/LICENSE-2.0
+	
+	Unless required by applicable law or agreed to in writing,
+	software distributed under the License is distributed on an
+	"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+	KIND, either express or implied.  See the License for the
+	specific language governing permissions and limitations
+	under the License.   
+-->
+Apache Cayenne
+==============
 
-[![Build Status](https://github.com/TDesjardins/gwt-ol/workflows/Build/badge.svg)](https://github.com/TDesjardins/gwt-ol/actions)
-[![Maven Central](https://img.shields.io/maven-central/v/com.github.tdesjardins/gwt-ol3.svg?colorB=44cc11)](https://search.maven.org/artifact/com.github.tdesjardins/gwt-ol3)
-[![Join the chat at https://gitter.im/gwt-ol3/Lobby](https://badges.gitter.im/gwt-ol3/Lobby.svg)](https://gitter.im/gwt-ol3/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+[![Maven Central](https://img.shields.io/maven-central/v/org.apache.cayenne/cayenne-server/4.1.svg)](https://cayenne.apache.org/download/)
+[![Build Status](https://app.travis-ci.com/apache/cayenne.svg?branch=master)](https://app.travis-ci.com/apache/cayenne)
 
-With **gwt-ol** you can write fast mapping applications for web and mobile in pure Java. Technically speaking, it is a GWT wrapper for [OpenLayers 3+](http://openlayers.org/ "OpenLayers website") using the [JSInterop](https://docs.google.com/document/d/10fmlEYIHcyead_4R1S5wKGs1t2I7Fnp_PaNaa7XTEk0/edit)-Features of the [GWT-SDK](http://www.gwtproject.org/release-notes.html#Release_Notes_2_8_0 "Release notes"). The project consists of two parts:
-  
-  * a GWT wrapper for OpenLayers 3+ (gwt-ol3-client)
-  * a demo module for showing wrapper functionality (gwt-ol3-demo)
 
-You can build (`mvn package`) and run (`mvn gwt:devmode`) the application using Maven.
+<p align="center">
+    <a href="https://cayenne.apache.org"><img src="https://cayenne.apache.org/img/cayenne_illustr3-30e8b8fa06.png" width="261" height="166" alt="Apache Cayenne Logo"/></a>
+</p>
 
-If you want to build the application without Maven please consider the following hints: 
+[Apache Cayenne](https://cayenne.apache.org) is an open source persistence framework licensed under the Apache License, providing object-relational mapping (ORM) and remoting services. 
 
-  * Building the application with older GWT-SDK than 2.8.0-beta1 will not work. You can download the latest SDK [here](http://www.gwtproject.org/versions.html).
+Table Of Contents
+-----------------
 
-## Demo App
-[GWT-OL live example](https://tdesjardins.github.io/gwt-ol-demo-site/)
+* [Quick Start](#quick-start)
+    * [Create Project](#create-xml-mapping)
+        * [Cayenne Modeler](#modeler-gui-application)
+        * [Maven plugin](#maven-plugin)
+        * [Gradle plugin](#gradle-plugin)
+    * [Include Cayenne Into Project](#include-cayenne-into-project)
+    * [Create Cayenne Runtime](#create-cayenne-runtime)
+    * [Create New Objects](#create-new-objects)
+    * [Queries](#queries)
+        * [Select Objects](#select-objects)
+        * [Aggregate Functions](#aggregate-functions)
+        * [Raw SQL queries](#raw-sql-queries)
+* [Documentation](#documentation)
+* [About](#about)
+* [License](#license)
+* [Collaboration](#collaboration)
 
-## Project Setup
 
-### Maven dependency
+Quick Start
+----------------
+
+#### Create XML mapping
+
+##### Modeler GUI application
+
+You can use Cayenne Modeler to manually create Cayenne project without DB.
+Binary distributions can be downloaded from https://cayenne.apache.org/download/
+
+[![Modeler](https://cayenne.apache.org/img/cayenne-modeler-40rc1-24b0368dc2.png)](https://cayenne.apache.org/download/)
+
+See tutorial https://cayenne.apache.org/docs/4.1/getting-started-guide/ 
+
+##### Maven plugin
+
+Additionally you can use Cayenne Maven (or [Gradle](#gradle-plugin)) plugin to create model based on existing DB structure.
+Here is example of Cayenne Maven plugin setup that will do it:
+
 ```xml
-<dependency>
-  <groupId>com.github.tdesjardins</groupId>
-  <artifactId>gwt-ol3</artifactId>
-  <version>[x.x.x]</version>
-</dependency>
+<plugin>
+    <groupId>org.apache.cayenne.plugins</groupId>
+    <artifactId>cayenne-maven-plugin</artifactId>
+    <version>4.1</version>
+
+    <dependencies>
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <version>8.0.13</version>
+        </dependency>
+    </dependencies>
+
+    <configuration>
+        <map>${project.basedir}/src/main/resources/demo.map.xml</map>
+        <cayenneProject>${project.basedir}/src/main/resources/cayenne-demo.xml</cayenneProject>
+        <dataSource>
+            <url>jdbc:mysql://localhost:3306/cayenne_demo</url>
+            <driver>com.mysql.cj.jdbc.Driver</driver>
+            <username>user</username>
+            <password>password</password>
+        </dataSource>
+        <dbImport>
+            <defaultPackage>org.apache.cayenne.demo.model</defaultPackage>
+        </dbImport>
+    </configuration>
+</plugin>
 ```
-Replace `[x.x.x]` with the gwt-ol version you want to use.
-### GWT module
+
+Run it:
+```bash
+mvn cayenne:cdbimport
+mvn cayenne:cgen
+```
+See tutorial https://cayenne.apache.org/docs/4.1/getting-started-db-first/
+
+##### Gradle plugin
+
+And here is example of Cayenne Gradle plugin setup:
+
+```gradle
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath group: 'org.apache.cayenne.plugins', name: 'cayenne-gradle-plugin', version: '4.1'
+        classpath 'mysql:mysql-connector-java:8.0.13'
+    }
+}
+
+apply plugin: 'org.apache.cayenne'
+cayenne.defaultDataMap 'demo.map.xml'
+
+cdbimport {   
+    cayenneProject 'cayenne-demo.xml'
+
+    dataSource {
+        driver 'com.mysql.cj.jdbc.Driver'
+        url 'jdbc:mysql://127.0.0.1:3306/cayenne_demo'
+        username 'user'
+        password 'password'
+    }
+
+    dbImport {
+        defaultPackage = 'org.apache.cayenne.demo.model'
+    }
+}
+
+cgen.dependsOn cdbimport
+compileJava.dependsOn cgen
+```
+
+Run it:
+```bash
+gradlew build
+```
+
+#### Include Cayenne into project
+
+##### Maven
 
 ```xml
-  <inherits name='ol.GwtOL'/>
+<dependencies>
+    <dependency>
+        <groupId>org.apache.cayenne</groupId>
+        <artifactId>cayenne-server</artifactId>
+        <version>4.1</version>
+    </dependency>
+</dependencies>
 ```
-optional: add this line for proj4js support
-```xml
-  <inherits name="proj4.GwtProj4"/>
-```
 
-### Resources
+##### Gradle
 
-```html
-  <link href="//cdn.jsdelivr.net/gh/openlayers/openlayers.github.io@master/en/v[x.x.x]/css/ol.css" rel="stylesheet" type="text/css">
-  <script src="//cdn.jsdelivr.net/gh/openlayers/openlayers.github.io@master/en/v[x.x.x]/build/ol.js" type="text/javascript"></script>
-```
-Replace `[x.x.x]` with the OpenLayers version you want to use.
-
-## Download
-
-Releases are deployed to [the Central Repository][dl].
-
-Snapshots of the development version are available in 
-[Sonatype's `snapshots` repository][snap].
-
-
- [dl]: https://search.maven.org/#search%7Cga%7C1%7Cg%3A%22com.github.tdesjardins%22
- [snap]: https://oss.sonatype.org/content/repositories/snapshots/
+```gradle
+compile group: 'org.apache.cayenne', name: 'cayenne-server', version: '4.1'
  
-## Projects using gwt-ol
+// or, if Gradle plugin is used
+compile cayenne.dependency('server')
+```
 
-[Running Reality](https://www.runningreality.org/)  
-[Mapping of Covid19 spread in Italy](https://www.k-teq.com/covid19/)
+#### Create Cayenne Runtime
+
+```java
+ServerRuntime cayenneRuntime = ServerRuntime.builder()
+    .addConfig("cayenne-demo.xml")
+    .dataSource(DataSourceBuilder
+             .url("jdbc:mysql://localhost:3306/cayenne_demo")
+             .driver("com.mysql.cj.jdbc.Driver")
+             .userName("username")
+             .password("password")
+             .build())
+    .build();
+```
+
+#### Create New Objects
+
+```java
+ObjectContext context = cayenneRuntime.newContext();
+
+Artist picasso = context.newObject(Artist.class);
+picasso.setName("Pablo Picasso");
+picasso.setDateOfBirth(LocalDate.of(1881, 10, 25));
+
+Gallery metropolitan = context.newObject(Gallery.class);
+metropolitan.setName("Metropolitan Museum of Art");
+
+Painting girl = context.newObject(Painting.class);
+girl.setName("Girl Reading at a Table");
+
+Painting stein = context.newObject(Painting.class);
+stein.setName("Gertrude Stein");
+
+picasso.addToPaintings(girl);
+picasso.addToPaintings(stein);
+
+girl.setGallery(metropolitan);
+stein.setGallery(metropolitan);
+
+context.commitChanges();
+```
+
+#### Queries
+
+##### Select Objects
+
+```java
+List<Painting> paintings = ObjectSelect.query(Painting.class)
+        .where(Painting.ARTIST.dot(Artist.DATE_OF_BIRTH).lt(LocalDate.of(1900, 1, 1)))
+        .prefetch(Painting.ARTIST.joint())
+        .select(context);
+```
+
+##### Aggregate functions
+
+```java
+// this is artificial property signaling that we want to get full object
+Property<Artist> artistProperty = Property.createSelf(Artist.class);
+
+List<Object[]> artistAndPaintingCount = ObjectSelect.columnQuery(Artist.class, artistProperty, Artist.PAINTING_ARRAY.count())
+    .where(Artist.ARTIST_NAME.like("a%"))
+    .having(Artist.PAINTING_ARRAY.count().lt(5L))
+    .orderBy(Artist.PAINTING_ARRAY.count().desc(), Artist.ARTIST_NAME.asc())
+    .select(context);
+
+for(Object[] next : artistAndPaintingCount) {
+    Artist artist = (Artist)next[0];
+    long paintingsCount = (Long)next[1];
+    System.out.println(artist.getArtistName() + " has " + paintingsCount + " painting(s)");
+}
+
+```
+
+##### Raw SQL queries
+
+```java
+// Selecting objects
+List<Painting> paintings = SQLSelect
+    .query(Painting.class, "SELECT * FROM PAINTING WHERE PAINTING_TITLE LIKE #bind($title)")
+    .params("title", "painting%")
+    .upperColumnNames()
+    .localCache()
+    .limit(100)
+    .select(context);
+
+// Selecting scalar values
+List<String> paintingNames = SQLSelect
+    .scalarQuery(String.class, "SELECT PAINTING_TITLE FROM PAINTING WHERE ESTIMATED_PRICE > #bind($price)")
+    .params("price", 100000)
+    .select(context);
+
+// Insert values
+int inserted = SQLExec
+    .query("INSERT INTO ARTIST (ARTIST_ID, ARTIST_NAME) VALUES (#bind($id), #bind($name))")
+    .paramsArray(55, "Picasso")
+    .update(context);
+
+```
+
+Documentation
+----------------
+
+#### Getting Started
+
+https://cayenne.apache.org/docs/4.1/getting-started-guide/
+
+#### Getting Started Db-First
+
+https://cayenne.apache.org/docs/4.1/getting-started-db-first/
+
+#### Full documentation
+
+https://cayenne.apache.org/docs/4.1/cayenne-guide/
+
+#### JavaDoc
+
+https://cayenne.apache.org/docs/4.1/api/
+
+About
+-----
+
+With a wealth of unique and powerful features, Cayenne can address a wide range of persistence needs. Cayenne seamlessly binds one or more database schemas directly to Java objects, managing atomic commit and rollbacks, SQL generation, joins, sequences, and more. With Cayenne's Remote Object Persistence, those Java objects can even be persisted out to clients via Web Services.
+
+Cayenne is designed to be easy to use, without sacrificing flexibility or design. To that end, Cayenne supports database reverse engineering and generation, as well as a Velocity-based class generation engine. All of these functions can be controlled directly through the CayenneModeler, a fully functional GUI tool. No cryptic XML or annotation based configuration is required! An entire database schema can be mapped directly to Java objects within minutes, all from the comfort of the GUI-based CayenneModeler.
+
+Cayenne supports numerous other features, including caching, a complete object query syntax, relationship pre-fetching, on-demand object and relationship faulting, object inheritance, database auto-detection, and generic persisted objects. Most importantly, Cayenne can scale up or down to virtually any project size. With a mature, 100% open source framework, an energetic user community, and a track record of solid performance in high-volume environments, Cayenne is an exceptional choice for persistence services.
+
+Collaboration
+--------------
+
+* [Bug/Feature Tracker](https://issues.apache.org/jira/browse/CAY)
+* [Mailing lists](https://cayenne.apache.org/mailing-lists.html)
+* [Support](https://cayenne.apache.org/support.html)
+* [Contributing](https://cayenne.apache.org/how-can-i-help.html)
+
+License
+---------
+Cayenne is available as free and open source under the [Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0).
