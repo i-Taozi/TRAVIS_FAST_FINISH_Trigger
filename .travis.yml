@@ -23,6 +23,7 @@ services:
 
 env:
   jobs:
+  fast_finish: true
     - DB_PROFILE=hsql
     - DB_PROFILE=h2
     - DB_PROFILE=derby
