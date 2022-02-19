@@ -1,0 +1,71 @@
+<form name="paymentForm" ng-submit="synchronizeBalance()" novalidate class="payment inner-block">
+
+    <md-toolbar md-theme="inner-block">
+        <div class="md-toolbar-tools">
+            <md-checkbox ng-model="balance.paidStatus" class="md-primary" md-theme="default"
+                         ng-disabled="!security.hasAnyRole(['ROLE_ADMIN', 'ROLE_BOSS', 'ROLE_SECRETARY'])
+                         || !hasAtLeastOnePayment()">
+                <h2>
+                    <span ng-hide="balance.paidStatus" translate>Not Paid</span>
+                    <span ng-show="balance.paidStatus" translate>Is Paid</span>
+                </h2>
+            </md-checkbox>
+
+            <span flex></span>
+
+            <md-button type="button" class="md-icon-button" ng-click="addPayment()" ng-hide="balance.paidStatus">
+                <md-icon md-font-set="material-icons">note_add</md-icon>
+            </md-button>
+        </div>
+    </md-toolbar>
+
+    <md-content layout-align="center start" class="payment-lines">
+
+        <md-list class="comments-list">
+            <md-list-item class="md-3-line" ng-repeat="payment in balance.payments | orderBy: '-id'">
+
+                <md-content layout="row" layout-align="start center" flex>
+                    <payment-line payment="payment" paid="balance.paidStatus" flex="95"></payment-line>
+
+                        <md-button class="md-icon-button" type="button"
+                                   ng-show="!balance.paidStatus
+                                   && (security.hasAnyRole(['ROLE_ADMIN', 'ROLE_BOSS'])
+                                   || security.isSameUser(payment.user))">
+                            <md-icon md-font-set="material-icons" ng-click="delPayment(payment, $event)">delete</md-icon>
+                        </md-button>
+                </md-content>
+
+            </md-list-item>
+        </md-list>
+
+    </md-content>
+
+    <md-toolbar md-theme="inner-block">
+        <div class="md-toolbar-tools">
+
+            <md-input-container md-theme="default" class="estimatedCost">
+                <label translate>estimated cost</label>
+                <input type="number" min="0" ng-model="balance.estimatedCost" ng-disabled="balance.paidStatus">
+            </md-input-container>
+
+            <span flex></span>
+
+            <span ng-hide="hasPrepayment && !balance.paidStatus">{{'sum' | translate}}:</span>
+            <span ng-show="hasPrepayment && !balance.paidStatus">{{'sum with prepayment' | translate}}:</span>
+            <span style="margin-left: 1rem"></span>
+            <span class="sum">
+                {{sum('rub', hasPrepayment && !balance.paidStatus) | currency: '&#x20bd;'}},
+                {{sum('uah', hasPrepayment && !balance.paidStatus) | currency: '&#8372;'}},
+                {{sum('usd', hasPrepayment && !balance.paidStatus) | currency: '$'}}
+            </span>
+
+        </div>
+    </md-toolbar>
+
+    <md-content layout-padding layout="row" layout-sm="column" layout-align="center center">
+        <md-button class="md-raised md-primary" type="submit" ng-disabled="paymentForm.$invalid">
+            <span translate>Modify Check</span>
+        </md-button>
+    </md-content>
+
+</form>

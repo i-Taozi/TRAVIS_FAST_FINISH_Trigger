@@ -1,0 +1,280 @@
+<form name="chequeForm" novalidate autocomplete="off" class="md-whiteframe-z1" ng-show="!!cheque">
+
+    <md-toolbar>
+        <div class="md-toolbar-tools">
+            <h2>
+                <span ng-show="hasID">{{'Change cheque' | translate}} №{{cheque.id}}</span>
+                <span ng-hide="hasID">{{'new cheque' | translate}}</span>
+            </h2>
+
+            <span flex></span>
+
+            <md-button type="button" class="md-icon-button" ng-click="printCheque()" ng-show="hasID">
+                <md-icon md-font-set="material-icons" aria-label="delete">print</md-icon>
+            </md-button>
+
+            <md-button type="button" class="md-icon-button" ng-click="deleteCheque($event)" ng-show="hasID && security.hasRole('ROLE_ADMIN')">
+                <md-icon md-font-set="material-icons">delete</md-icon>
+            </md-button>
+        </div>
+    </md-toolbar>
+
+    <md-content class="dates-field" layout="row" layout-align="space-around start" flex>
+
+        <md-content layout="column" layout-align="center start" class="width27">
+            <p class="with-date">{{ 'Introduced' | translate}}</p>
+            <date-time-picker ng-model="cheque.receiptDate" ng-disabled="disableChequeForm"></date-time-picker>
+        </md-content>
+
+        <md-content layout="column" layout-align="center start" class="width19">
+            <md-checkbox ng-model="cheque.warrantyStatus"
+                         class="md-primary with-date"
+                         ng-change="cleanDateIfOff('warrantyDate', 'warrantyStatus')"
+                         ng-disabled="disableChequeForm">
+                <p>{{ 'Warranty' | translate}}</p>
+            </md-checkbox>
+            <date-picker ng-model="cheque.warrantyDate"
+                         ng-disabled="!cheque.warrantyStatus || disableChequeForm"></date-picker>
+        </md-content>
+
+        <md-content layout="column" layout-align="center start" ng-show="hasID" class="width19">
+            <md-checkbox ng-model="cheque.readyStatus"
+                         ng-change="currentDateIfEmpty('readyDate', 'readyStatus'); syncWithWithoutRepairStatus()"
+                         class="md-primary with-date">
+                <p>{{ 'Is Ready' | translate}}</p>
+            </md-checkbox>
+            <date-picker ng-model="cheque.readyDate"
+                         ng-disabled="!cheque.readyStatus"></date-picker>
+        </md-content>
+
+        <md-content layout="column" layout-align="center start" ng-show="hasID" class="width16">
+            <md-checkbox ng-model="cheque.withoutRepair"
+                         class="md-primary with-date without-repair"
+                         ng-disabled="disableChequeForm"
+                         ng-change="syncWithReadyStatus()">
+                <p>{{ 'Is Without Repair' | translate}}</p>
+            </md-checkbox>
+        </md-content>
+
+        <md-content layout="column" layout-align="center start" ng-show="hasID" class="width19">
+            <md-checkbox ng-model="cheque.returnedToClientStatus"
+                         ng-change="currentDateIfEmpty('returnedToClientDate', 'returnedToClientStatus')"
+                         class="md-primary with-date"
+                         ng-disabled="disableChequeForm">
+                <p>{{ 'Is Issued' | translate}}</p>
+            </md-checkbox>
+            <date-picker ng-model="cheque.returnedToClientDate"
+                         ng-disabled="!cheque.returnedToClientStatus || disableChequeForm"></date-picker>
+        </md-content>
+
+    </md-content>
+
+    <md-content layout-padding layout="row" layout-sm="column" layout-align="center start" class="text-field">
+
+        <input ng-model="cheque.customerName" required hidden>
+        <md-autocomplete flex="75" class="md-icon-float"
+                         ng-model-options="{debounce:500}"
+                         md-input-name="customerName" required
+                         md-search-text="cheque.customerName"
+                         md-no-cache="true"
+                         md-min-length="2"
+                         md-items="item in getAutocompleteData('customers', cheque.customerName, chequeForm.$dirty)"
+                         md-item-text="item"
+                         md-floating-label="{{'Customer' | translate}}"
+                         md-autofocus="false"
+                         md-autoselect="true"
+                         ng-disabled="disableChequeForm">
+            <md-item-template>
+                <span md-highlight-text="cheque.customerName" md-highlight-flags="^i"> {{item}} </span>
+            </md-item-template>
+        </md-autocomplete>
+
+        <md-input-container flex="25" class="simple-input">
+            <label translate>Repair Period</label>
+            <input type="number" min="1" max="99" ng-model="cheque.repairPeriod">
+        </md-input-container>
+    </md-content>
+
+    <md-content layout-padding layout="row" layout-sm="column" layout-align="center start" class="text-field">
+
+        <input ng-model="cheque.productName" required hidden>
+        <md-autocomplete flex="40"
+                         ng-model-options="{debounce:500}"
+                         md-search-text="cheque.productName"
+                         md-input-name="productName"
+                         md-no-cache="true"
+                         md-min-length="2"
+                         md-items="item in getAutocompleteData('products', cheque.productName, chequeForm.$dirty)"
+                         md-item-text="item"
+                         md-floating-label="{{'Name of Product' | translate}}"
+                         md-autofocus="false"
+                         md-autoselect="true"
+                         ng-disabled="disableChequeForm"
+                         required>
+            <md-item-template>
+                <span md-highlight-text="cheque.productName" md-highlight-flags="^i"> {{item}} </span>
+            </md-item-template>
+        </md-autocomplete>
+
+        <input ng-model="cheque.modelName" required hidden>
+        <md-autocomplete flex="30"
+                         ng-model-options="{debounce:500}"
+                         md-search-text="cheque.modelName"
+                         md-input-name="modelName"
+                         md-no-cache="true"
+                         md-min-length="2"
+                         md-items="item in getAutocompleteData('models', cheque.modelName, chequeForm.$dirty)"
+                         md-item-text="item"
+                         md-floating-label="{{'Model' | translate}}"
+                         md-autofocus="false"
+                         md-autoselect="true"
+                         ng-disabled="disableChequeForm"
+                         required>
+            <md-item-template>
+                <span md-highlight-text="cheque.modelName" md-highlight-flags="^i"> {{item}} </span>
+            </md-item-template>
+        </md-autocomplete>
+
+        <md-autocomplete flex="30"
+                         ng-model-options="{debounce:500}"
+                         md-search-text="cheque.serialNumber"
+                         md-input-name="serialNumber"
+                         md-no-cache="true"
+                         md-min-length="2"
+                         md-search-text-change=""
+                         md-items="item in getAutocompleteData('serials', cheque.serialNumber, chequeForm.$dirty)"
+                         md-item-text="item"
+                         md-floating-label="{{'Serial Number' | translate}}"
+                         md-autofocus="false"
+                         md-autoselect="true"
+                         ng-disabled="disableChequeForm"
+                         required>
+            <md-item-template>
+                <span md-highlight-text="filter.serialNumber" md-highlight-flags="^i"> {{item}} </span>
+            </md-item-template>
+        </md-autocomplete>
+
+    </md-content>
+
+    <md-content layout-padding layout="row" layout-sm="column" layout-align="center start" class="text-field">
+        <md-input-container flex class="simple-input">
+            <label translate>Malfunction</label>
+            <input ng-model="cheque.defect" ng-disabled="disableChequeForm" md-maxlength="150">
+        </md-input-container>
+    </md-content>
+
+    <md-content layout-padding layout="row" layout-sm="column" layout-align="center start" class="text-field">
+        <md-input-container flex class="simple-input">
+            <label translate>Special Notes</label>
+            <input ng-model="cheque.specialNotes" ng-disabled="disableChequeForm" md-maxlength="150">
+        </md-input-container>
+    </md-content>
+
+    <md-content layout-padding layout="row" layout-sm="column" layout-align="center start" class="text-field">
+        <input ng-model="cheque.representativeName" required hidden>
+        <md-autocomplete flex="30" class="md-icon-float"
+                         ng-model-options="{debounce:500}"
+                         md-search-text="cheque.representativeName"
+                         md-input-name="representativeName"
+                         md-no-cache="true"
+                         md-min-length="2"
+                         md-items="item in getAutocompleteData('representatives', cheque.representativeName, chequeForm.$dirty)"
+                         md-item-text="item"
+                         md-floating-label="{{'Purchaser' | translate}}"
+                         md-autofocus="false"
+                         md-autoselect="true"
+                         ng-disabled="disableChequeForm"
+                         required>
+            <md-item-template>
+                <span md-highlight-text="cheque.representativeName" md-highlight-flags="^i"> {{item}} </span>
+            </md-item-template>
+        </md-autocomplete>
+
+        <md-input-container flex="30" class="simple-input">
+            <label translate>Address</label>
+            <input ng-model="cheque.address" ng-disabled="disableChequeForm">
+        </md-input-container>
+
+        <md-input-container flex="20" class="simple-input">
+            <label translate>Phone</label>
+            <input ng-model="cheque.phoneNumber" class="phoneNumber" ng-disabled="disableChequeForm">
+        </md-input-container>
+
+        <md-autocomplete flex="30" class="md-icon-float"
+                         ng-model-options="{debounce:500}"
+                         md-search-text="cheque.email"
+                         md-input-name="email"
+                         md-no-cache="true"
+                         md-min-length="2"
+                         md-items="item in getAutocompleteData('emails', cheque.email, chequeForm.$dirty)"
+                         md-item-text="item"
+                         md-floating-label="{{'Email' | translate}}"
+                         md-autofocus="false"
+                         md-autoselect="true"
+                         ng-disabled="disableChequeForm">
+            <md-item-template>
+                <span md-highlight-text="cheque.email" md-highlight-flags="^i"> {{item}} </span>
+            </md-item-template>
+        </md-autocomplete>
+
+    </md-content>
+
+    <md-content layout-padding layout="row" layout-sm="column" layout-align="center start" class="text-field">
+
+        <md-input-container flex="50">
+            <label>{{'master' | translate}}</label>
+            <md-select ng-model="cheque.engineer"
+                       md-on-open="getUsers()"
+                       name="engineer"
+                       placeholder="{{'master' | translate}}"
+                       ng-disabled="disableChequeForm"
+                       ng-model-options="{trackBy: '$value.username'}">
+                <md-option ng-value="user" ng-repeat="user in users">{{user.fullname}}</md-option>
+            </md-select>
+        </md-input-container>
+
+        <md-input-container flex="50">
+            <label>{{'Inspector' | translate}}</label>
+            <md-select ng-model="cheque.secretary"
+                       md-on-open="getUsers()"
+                       name="secretary"
+                       placeholder="{{'Inspector' | translate}}"
+                       ng-disabled="disableChequeForm"
+                       ng-model-options="{trackBy: '$value.username'}">
+                <md-option ng-value="user" ng-repeat="user in users">{{user.fullname}}</md-option>
+            </md-select>
+        </md-input-container>
+
+    </md-content>
+
+    <md-content layout-padding layout="row" layout-align="center start">
+        <md-chips ng-model="cheque.components" flex
+                  md-transform-chip="addKit($chip)"
+                  readonly="disableChequeForm">
+
+            <md-autocomplete
+                    md-search-text="$chip"
+                    md-items="item in getAutocompleteData('components', $chip, chequeForm.$dirty)"
+                    md-item-text="item"
+                    md-min-length="2"
+                    md-no-cache="true"
+                    placeholder="{{'Kits' | translate}}"
+                    secondary-placeholder="{{'Kits' | translate}}">
+                <span md-highlight-text="$chip">{{item}}</span>
+            </md-autocomplete>
+
+            <md-chip-template>{{$chip.name}}</md-chip-template>
+        </md-chips>
+    </md-content>
+
+    <md-content layout-padding layout="row" layout-sm="column" layout-align="space-between center">
+        <span style="visibility: hidden"></span>
+        <md-button ng-click="syncCheque()" class="md-raised md-primary" type="button" ng-disabled="chequeForm.$invalid">
+            <span translate>Modify Check</span>
+        </md-button>
+        <md-checkbox ng-model="cheque.actVisualInspection" class="md-primary without-margin">
+            <md-icon md-font-set="material-icons">shopping_cart</md-icon>
+        </md-checkbox>
+    </md-content>
+
+</form>

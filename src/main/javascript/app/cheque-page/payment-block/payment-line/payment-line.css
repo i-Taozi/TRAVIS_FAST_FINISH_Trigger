@@ -1,0 +1,26 @@
+@media screen {
+    payment-line .red {
+        color: #B71C1C;
+    }
+
+    payment-line .green {
+        color: #1B5E20;
+    }
+
+    payment-line .to-pay {
+        font-family: 'Roboto', serif;
+        text-align: center;
+    }
+
+    payment-line .select-bottom-margin {
+        margin-bottom: 23px;
+    }
+
+    payment-line .text-bottom-margin {
+        margin-bottom: 0;
+    }
+
+    payment-line md-select-value span:first-child {
+        max-width: 150px;
+    }
+}

@@ -1,0 +1,216 @@
+<section class="content-block">
+    <form name="filterForm" id="filterForm" class="md-whiteframe-z1" ng-submit="sendFilterPreferences()">
+        <md-toolbar>
+            <div class="md-toolbar-tools">
+                <h2>
+                    <span translate>Filters</span>
+                </h2>
+                <span flex></span>
+                <md-button type="button" class="md-icon-button" ng-click="getExcelAnalytics()">
+                    <md-icon md-font-set="material-icons">list</md-icon>
+                </md-button>
+                <md-button type="button" class="md-icon-button" ng-click="resetFilter()">
+                    <md-icon md-font-set="material-icons">delete</md-icon>
+                </md-button>
+            </div>
+        </md-toolbar>
+
+        <md-content class="dates-field" layout="row" layout-align="space-around end" flex>
+
+            <md-content layout="column" layout-align="end center">
+                <date-picker ng-model="$root.filter.introducedFrom" md-placeholder="'IntroducedFrom'"></date-picker>
+            </md-content>
+
+            <md-content layout="column" layout-align="end center">
+                <date-picker ng-model="$root.filter.introducedTo" md-placeholder="'IntroducedTo'"></date-picker>
+            </md-content>
+
+            <md-content layout="column" layout-align="end center">
+                <date-picker ng-model="$root.filter.returnedToClientFrom" md-placeholder="'returnedToClientFrom'"></date-picker>
+            </md-content>
+
+            <md-content layout="column" layout-align="end center">
+                <date-picker ng-model="$root.filter.returnedToClientTo" md-placeholder="'returnedToClientTo'"></date-picker>
+            </md-content>
+
+        </md-content>
+
+        <md-content layout-padding layout="row" layout-sm="column" layout-align="center start" class="text-field after-date">
+
+            <md-input-container flex="10">
+                <label translate>Id</label>
+                <input ng-model="$root.filter.id">
+            </md-input-container>
+
+            <md-autocomplete flex="90"
+                             ng-model-options="{debounce:500}"
+                             md-search-text="$root.filter.customerName"
+                             md-no-cache="true"
+                             md-min-length="2"
+                             md-items="item in getAutocompleteData('customers', $root.filter.customerName)"
+                             md-item-text="item"
+                             md-floating-label="{{'Customer' | translate}}"
+                             md-autofocus="false"
+                             md-autoselect="true">
+                <md-item-template>
+                    <span md-highlight-text="filter.customerName" md-highlight-flags="^i"> {{item}} </span>
+                </md-item-template>
+            </md-autocomplete>
+
+        </md-content>
+
+        <md-content layout-padding layout="row" layout-sm="column" layout-align="center start" class="text-field">
+
+            <md-autocomplete flex="40"
+                             ng-model-options="{debounce:500}"
+                             md-search-text="$root.filter.productName"
+                             md-no-cache="true"
+                             md-min-length="2"
+                             md-items="item in getAutocompleteData('products', $root.filter.productName)"
+                             md-item-text="item"
+                             md-floating-label="{{'Name of Product' | translate}}"
+                             md-autofocus="false"
+                             md-autoselect="true">
+                <md-item-template>
+                    <span md-highlight-text="filter.productName" md-highlight-flags="^i"> {{item}} </span>
+                </md-item-template>
+            </md-autocomplete>
+
+            <md-autocomplete flex="30"
+                             ng-model-options="{debounce:500}"
+                             md-search-text="$root.filter.model"
+                             md-no-cache="true"
+                             md-min-length="2"
+                             md-items="item in getAutocompleteData('models', $root.filter.model)"
+                             md-item-text="item"
+                             md-floating-label="{{'Model' | translate}}"
+                             md-autofocus="false"
+                             md-autoselect="true">
+                <md-item-template>
+                    <span md-highlight-text="filter.model" md-highlight-flags="^i"> {{item}} </span>
+                </md-item-template>
+            </md-autocomplete>
+
+            <md-autocomplete flex="30"
+                             ng-model-options="{debounce:500}"
+                             md-search-text="$root.filter.serialNumber"
+                             md-no-cache="true"
+                             md-min-length="2"
+                             md-items="item in getAutocompleteData('serials', $root.filter.serialNumber)"
+                             md-item-text="item"
+                             md-floating-label="{{'Serial Number' | translate}}"
+                             md-autofocus="false"
+                             md-autoselect="true">
+                <md-item-template>
+                    <span md-highlight-text="filter.serialNumber" md-highlight-flags="^i"> {{item}} </span>
+                </md-item-template>
+            </md-autocomplete>
+
+        </md-content>
+
+        <md-content layout-padding layout="row" layout-sm="column" layout-align="center start" class="text-field">
+
+            <md-autocomplete flex="70"
+                             ng-model-options="{debounce:500}"
+                             md-search-text="$root.filter.representativeName"
+                             md-no-cache="true"
+                             md-min-length="2"
+                             md-items="item in getAutocompleteData('representatives', $root.filter.representativeName)"
+                             md-item-text="item"
+                             md-floating-label="{{'Purchaser' | translate}}"
+                             md-autofocus="false"
+                             md-autoselect="true">
+                <md-item-template>
+                    <span md-highlight-text="filter.representativeName" md-highlight-flags="^i"> {{item}} </span>
+                </md-item-template>
+            </md-autocomplete>
+
+            <md-autocomplete flex="30"
+                             ng-model-options="{debounce:500}"
+                             md-search-text="$root.filter.phoneNumber"
+                             md-no-cache="true"
+                             md-min-length="2"
+                             md-items="item in getAutocompleteData('phoneNumbers', $root.filter.phoneNumber)"
+                             md-item-text="item"
+                             md-floating-label="{{'Phone' | translate}}"
+                             md-autofocus="false"
+                             md-autoselect="true">
+                <md-item-template>
+                    <span md-highlight-text="filter.phoneNumber" md-highlight-flags="^i"> {{item}} </span>
+                </md-item-template>
+            </md-autocomplete>
+
+        </md-content>
+
+        <md-content layout-padding layout="row" layout-sm="column" layout-align="center start" class="text-field">
+
+            <md-autocomplete flex="50"
+                             ng-model-options="{debounce:500}"
+                             md-search-text="$root.filter.secretary"
+                             md-no-cache="true"
+                             md-min-length="2"
+                             md-items="item in getAutocompleteData('secretaries', $root.filter.secretary)"
+                             md-item-text="item"
+                             md-floating-label="{{'Inspector' | translate}}"
+                             md-autofocus="false"
+                             md-autoselect="true">
+                <md-item-template>
+                    <span md-highlight-text="filter.secretary" md-highlight-flags="^i"> {{item}} </span>
+                </md-item-template>
+            </md-autocomplete>
+
+            <md-autocomplete flex="50"
+                             ng-model-options="{debounce:500}"
+                             md-search-text="$root.filter.engineer"
+                             md-no-cache="true"
+                             md-min-length="2"
+                             md-items="item in getAutocompleteData('engineers', $root.filter.engineer)"
+                             md-item-text="item"
+                             md-floating-label="{{'master' | translate}}"
+                             md-autofocus="false"
+                             md-autoselect="true">
+                <md-item-template>
+                    <span md-highlight-text="filter.engineer" md-highlight-flags="^i"> {{item}} </span>
+                </md-item-template>
+            </md-autocomplete>
+
+        </md-content>
+
+        <md-content layout-padding layout="row" layout-align="center start" class="text-field">
+
+            <md-select ng-model="$root.filter.warrantyStatus" placeholder="{{'Guarantee' | translate}}" flex="20">
+                <md-option value="true">{{'Has guarantee' | translate}}</md-option>
+                <md-option value="false">{{'Has no guarantee' | translate}}</md-option>
+            </md-select>
+
+            <md-select ng-model="$root.filter.readyStatus" placeholder="{{'Ready' | translate}}" flex="20">
+                <md-option value="true">{{'Is Ready' | translate}}</md-option>
+                <md-option value="false">{{'Not ready' | translate}}</md-option>
+            </md-select>
+
+            <md-select ng-model="$root.filter.returnedToClientStatus" placeholder="{{'Issued' | translate}}" flex="20">
+                <md-option value="true">{{'Is Issued' | translate}}</md-option>
+                <md-option value="false">{{'Not issued' | translate}}</md-option>
+            </md-select>
+
+            <md-select ng-model="$root.filter.paidStatus" placeholder="{{'Paid' | translate}}" flex="20">
+                <md-option value="true">{{'Is Paid' | translate}}</md-option>
+                <md-option value="false">{{'Not Paid' | translate}}</md-option>
+            </md-select>
+
+            <md-select ng-model="$root.filter.withoutRepair" placeholder="{{'Without Repair' | translate}}" flex="20">
+                <md-option value="true">{{'Is Without Repair' | translate}}</md-option>
+                <md-option value="false">{{'With Repair' | translate}}</md-option>
+            </md-select>
+
+        </md-content>
+
+        <md-content layout-padding layout="row" layout-sm="column" layout-align="center center">
+            <md-button id="find" class="md-raised md-primary" type="submit" ng-disabled="filterForm.$invalid">
+                <span translate>find</span>
+            </md-button>
+        </md-content>
+
+    </form>
+</section>
+

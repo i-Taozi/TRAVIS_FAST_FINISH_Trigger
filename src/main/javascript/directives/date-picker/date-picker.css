@@ -1,0 +1,8 @@
+@media screen {
+
+    md-datepicker {
+        margin: 0;
+        overflow:hidden;
+    }
+
+}

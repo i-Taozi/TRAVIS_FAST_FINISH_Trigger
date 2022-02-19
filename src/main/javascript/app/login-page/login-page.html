@@ -1,0 +1,42 @@
+<section layout="column" layout-align="center center" layout-wrap>
+
+    <form role="form" ng-submit="login()" layout="column" layout-align="center center" class="md-whiteframe-z1">
+
+        <md-toolbar>
+            <h2 class="md-toolbar-tools">
+                {{'authorization' | translate}}
+            </h2>
+        </md-toolbar>
+
+        <md-content layout-padding class="first">
+            <md-input-container class="md-icon-float">
+                <label>{{'username' | translate}}</label>
+                <md-icon md-font-set="material-icons">people</md-icon>
+                <input ng-model="credentials.username" id="username" name="username">
+            </md-input-container>
+        </md-content>
+
+        <md-content layout-padding>
+            <md-input-container class="md-icon-float">
+                <label>{{'password' | translate}}</label>
+                <md-icon md-font-set="material-icons">lock</md-icon>
+                <input ng-model="credentials.password" id="password" name="password" type="password">
+            </md-input-container>
+        </md-content>
+
+        <div
+                vc-recaptcha
+                theme="'dark'"
+                key="model.key"
+                on-create="setWidgetId(widgetId)"
+                on-success="setResponse(response)"
+                on-expire="cbExpiration()"
+        ></div>
+
+        <md-content layout-padding>
+            <md-button type="submit" class="md-raised md-primary">{{'login' | translate}}</md-button>
+        </md-content>
+
+    </form>
+
+</section>

@@ -1,28 +1,41 @@
-# Welcome to highJ #
+# GearService
+[![Build Status](https://travis-ci.org/Nandtel/gear-service.svg?branch=master)](https://travis-ci.org/Nandtel/gear-service)
 
-[![Build Status](https://travis-ci.org/highj/highj.svg?branch=master)](https://travis-ci.org/highj/highj)
+This is my own "in production" application, which is works for a small service company and, to my surprise, they're even find it helpfull. This code may be interesting to you only as example of my brutal attempts to realize my vision of good application based on Spring Boot and AngularJS.
 
-HighJ tries to overcome Java's lack of higher order type polymorphism (a.k.a. "higher kinded types" in Scala), and translates several well known type-classes (including `Applicative`, `Monad` and `Foldable`) and data structures from Haskell to Java.
+## Technologies
+Server-side:
+- Java 8 (Stream API, Lambdas, new Date and Time)
+- Spring Boot 1.4.4 (Spring Framework, Spring Security, Spring Data, Spring Web)
+- MySQL (main DB), MongoDB (secondary DB for blobs), H2 (DB for tests)
+- Gradle build tool
+- JSoup html parser
+- Apache POI (Java API for Microsoft Documents)
+- Caffeine Cache
+- other server-side dependencies you can see in [build.gradle](build.gradle)
 
-The code required to simulate higher order polymorphism could be kindly described as "interesting", but to be honest, it is pretty ugly. Its most surprising feature is that it actually works.
+Client-side:
+- Angular JS 1.5.11
+- Angular-Material (UI components)
+- Moment JS
+- Google ReCaptcha
+- HTML5, CSS3
+- Npm JS package managers
+- Gulp JS task runner
+- Jasmine framework for testing code
+- Protractor E2E-test framework
+- Karma unit-test runner
+- other client-side dependencies you can see in bower.json for bower and [package.json](package.json)
 
-This project is just an experiment, it relies heavily on Java 8 features, and is *not yet* intended for production, but we are working on it. A lot of bad things might happen:
-  * Recursion is sometimes hard to avoid, which might lead to `StackOverflowError`s
-  * The code isn't very efficient, there might be excessive object creation going on
-  * Lazy behavior might lead to unexpected results, as beginners often face in Haskell
-  * The HKT mechanism requires casts. Our assumption is that nobody tries to break the mechanism intentionally 
-  * The test coverage and Wiki documentation is not as comprehensive as it should
-  
-Please consult the wiki for a more detailed description.
+## Demo
+Сonvenient demo at Heroku: https://gearservice.herokuapp.com <br />
+Wait a few seconds until the Heroku initializes app.
 
-## Related
+For Heroku app was rewritten:
+- Disabled Google reCaptcha
 
-- [functionaljava](https://github.com/functionaljava/functionaljava)
-- [Cyclops-React](https://github.com/aol/cyclops-react)
-- [Kotlinz](https://github.com/kotlinz/kotlinz)
-- [Scalaz](https://github.com/scalaz/scalaz)
-- [Swiftz](https://github.com/typelift/Swiftz)
+Available following users for login:
+- login: 'admin', pass: 'b' with administrator role
 
 ## License
-
-See [LICENSE](LICENSE.txt)
+The MIT License (MIT)
