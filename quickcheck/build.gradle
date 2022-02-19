@@ -1,0 +1,16 @@
+
+ext {
+    signModule = true
+}
+
+archivesBaseName = "${project.projectName}-${project.name}"
+
+dependencies {
+	compile project(":core")
+    compile junitCompile
+}
+
+performSigning(signingEnabled, signModule)
+configureUpload(signingEnabled, signModule)
+
+uploadArchives.enabled = true

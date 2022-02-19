@@ -1,0 +1,188 @@
+
+defaultTasks 'build'
+
+apply plugin: "com.github.ben-manes.versions"
+
+buildscript {
+    repositories {
+        mavenLocal()
+        jcenter()
+        mavenCentral()
+    }
+
+    dependencies {
+        classpath "com.github.ben-manes:gradle-versions-plugin:0.27.0"
+        classpath "biz.aQute.bnd:biz.aQute.bnd.gradle:5.3.0"
+    }
+
+    wrapper {
+        gradleVersion = "6.8.3"
+        distributionType = Wrapper.DistributionType.ALL
+    }
+}
+
+
+if (JavaVersion.current().isJava8Compatible()) {
+    allprojects {
+        tasks.withType(Javadoc) {
+            options.addStringOption('Xdoclint:none', '-quiet')
+        }
+    }
+}
+
+allprojects {
+
+    apply plugin: "jacoco"
+
+    jacoco {
+        toolVersion = "0.8.2"
+    }
+
+	defaultTasks "build"
+
+    ext {
+        isSnapshot = true
+        fjBaseVersion = "5.0"
+
+        snapshotAppendix = "-SNAPSHOT"
+		fjVersion = fjBaseVersion + (isSnapshot ? snapshotAppendix : "")
+        fjConsumeVersion = "4.8.1"
+
+        signModule = false
+
+        projectTitle = "Functional Java"
+		projectName = "functionaljava"
+        pomProjectName = projectTitle
+        pomOrganisation = projectTitle
+        projectDescription = "Functional Java is an open source library that supports closures for the Java programming language"
+        projectUrl = "http://functionaljava.org/"
+        scmUrl = "git://github.com/functionaljava/functionaljava.git"
+        scmGitFile = "scm:git@github.com:functionaljava/functionaljava.git"
+
+        sonatypeBaseUrl = "https://oss.sonatype.org"
+        sonatypeSnapshotUrl = "$sonatypeBaseUrl/content/repositories/snapshots/"
+        sonatypeRepositoryUrl = "$sonatypeBaseUrl/content/groups/public"
+        sonatypeReleaseUrl = "$sonatypeBaseUrl/service/local/staging/deploy/maven2/"
+        sonatypeUploadUrl = isSnapshot ? sonatypeSnapshotUrl : sonatypeReleaseUrl
+        primaryEmail = "functionaljava@googlegroups.com"
+
+        junitCompile = "junit:junit:4.12"
+        junitRuntime = "org.junit.vintage:junit-vintage-engine:5.5.2"
+
+        displayCompilerWarnings = true
+    }
+
+    repositories {
+        jcenter()
+        mavenCentral()
+        mavenLocal()
+    }
+
+	version = fjVersion
+	group = "org.functionaljava"
+
+}
+
+subprojects {
+
+
+    buildscript {
+        repositories {
+            mavenCentral()
+        }
+    }
+
+    apply from: "$rootDir/lib.gradle"
+	apply plugin: "java"
+	apply plugin: "eclipse"
+
+	repositories {
+        mavenLocal()
+        jcenter()
+		mavenCentral()
+		maven {
+			url sonatypeRepositoryUrl
+		}
+	}
+
+    tasks.withType(JavaCompile) {
+        options.compilerArgs.addAll(['--release', '8'])
+        if (displayCompilerWarnings) {
+			options.compilerArgs << "-Xlint:unchecked" << "-Xlint:deprecation"
+       }
+    }
+
+}
+
+task coverage(type: org.gradle.testing.jacoco.tasks.JacocoReport) {
+    dependsOn = subprojects*.test
+    executionData fileTree(project.rootDir.absolutePath).include("**/build/jacoco/*.exec")
+    // We only care about coverage of:
+    def projectForFoverage = ["core", "quickcheck", "java-core"]
+    getClassDirectories().from(files(subprojects.findAll {subproject -> subproject.name in projectForFoverage} .sourceSets.main.output))
+    getSourceDirectories().from(files(subprojects.findAll {subproject -> subproject.name in projectForFoverage} .sourceSets.main.allSource.srcDirs))
+
+    reports {
+        html.enabled = true
+        xml.enabled = true
+    }
+}
+
+configure(subprojects.findAll { it.name != "props-core" }) {
+
+    apply plugin: "maven"
+    apply plugin: "signing"
+    apply plugin: "biz.aQute.bnd.builder"
+    sourceCompatibility = "1.8"
+
+    javadoc {
+        options.addBooleanOption('html5', true)
+    }
+
+    task javadocJar(type: Jar, dependsOn: "javadoc") {
+        classifier = 'javadoc'
+        from "build/docs/javadoc"
+    }
+
+    task sourcesJar(type: Jar) {
+        from sourceSets.main.allSource
+        classifier = 'sources'
+    }
+
+    artifacts {
+        archives jar
+        archives javadocJar
+        archives sourcesJar
+    }
+
+    jar {
+        version project.fjVersion
+        bnd (
+                'Bundle-Name': 'Functional Java',
+                'Signature-Version': project.fjVersion,
+                'Bundle-ActivationPolicy': 'lazy',
+                'Bundle-Vendor': 'functionaljava.org',
+                'Automatic-Module-Name': "functionaljava${project.name == 'core' ? '' : ".$project.name"}",
+        )
+    }
+
+    eclipse {
+      project {
+        natures 'org.eclipse.pde.PluginNature'
+        buildCommand 'org.eclipse.pde.ManifestBuilder'
+        buildCommand 'org.eclipse.pde.SchemaBuilder'
+      }
+    }
+
+    // Output MANIFEST.MF statically so eclipse can see it for plugin development
+    task eclipsePluginManifest(dependsOn: jar) doLast {
+      file("META-INF").mkdirs()
+      jar.manifest.writeTo(file("META-INF/MANIFEST.MF"))
+    }
+
+    eclipseProject.dependsOn eclipsePluginManifest
+}
+
+task env doLast {
+	println System.getenv()
+}
