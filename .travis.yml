@@ -9,6 +9,7 @@ jdk:
  - openjdk-ea
 
 matrix:
+  fast_finish: true
 
   include:
   - jdk: openjdk12
