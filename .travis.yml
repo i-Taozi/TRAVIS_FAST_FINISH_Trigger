@@ -2,6 +2,7 @@ language: java
 sudo: false
 
 matrix:
+  fast_finish: true
 
   include:
   - jdk: openjdk8
