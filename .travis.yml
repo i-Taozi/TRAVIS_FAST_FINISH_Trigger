@@ -1,29 +1,20 @@
-language:
-    java
-
-sudo:
-    false
-
-dist: trusty
+language: java
 
 jdk:
-    - oraclejdk8
-    - oraclejdk9
-    - openjdk7
+  - openjdk8
+  - openjdk11
 
 matrix:
-  fast_finish: true
-    allow_failures:
-        - jdk: oraclejdk9
+  allow_failures:
+    - jdk: openjdk11
 
-before_script:
-  - git submodule update --remote --recursive
+after_success:
+  - ci/deploy-snapshot.sh
 
-script:
-  - cd sample-code-java
-  - mvn install -DsdkVersion=2.0.4-SNAPSHOT -DskipTests=true -Dmaven.javadoc.skip=true -B -V
-  - mvn test -DsdkVersion=2.0.4-SNAPSHOT -B
+notifications:
+  email: false
 
-after_script:
-    print_surefire_reports.sh
- 
+sudo: false
+cache:
+  directories:
+    - $HOME/.m2

@@ -1,8 +1,5 @@
-target
-logs
-
-#intellij files
-.idea
-*.iml
-.DS_Store
-docs/.DS_Store
+bin/
+.project
+.classpath
+.settings/
+target/
