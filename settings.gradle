@@ -1,5 +1,0 @@
-
-rootProject.name = "derive4j"
-
-include "annotation", "processor-api", "processor", "examples"
-
