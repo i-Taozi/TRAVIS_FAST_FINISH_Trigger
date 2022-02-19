@@ -23,6 +23,7 @@ before_install:
   - export MAVEN_SKIP_RC=true
 
 matrix:
+  fast_finish: true
   include:
     - env: JDK='Oracle JDK 8'
       jdk: oraclejdk8
